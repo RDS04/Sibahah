@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Data Siswa - Admin Sekolah Renang Sibahah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0) !important;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .status-active { background: #D1FAE5; color: #059669; }
+        .status-pending { background: #FEF3C7; color: #D97706; }
+        .table-row-hover:hover { background-color: #F0F9FF; }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
+        <div class="p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
+                    <i class="fas fa-water text-white text-md"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                    <p class="text-white/50 text-xs">Sekolah Renang</p>
+                </div>
+            </div>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="py-6 px-4">
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="students">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </a>
+                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Pendaftaran Baru</span>
+                </a>
+                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Pembayaran</span>
+                </a>
+                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Jadwal Latihan</span>
+                </a>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Lainnya</p>
+                <a href="/admin/settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="settings">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="javascript:void(0)" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="md:ml-72 min-h-screen">
+        <!-- Header Top -->
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-2xl md:hidden" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-darkblue" id="pageTitle">Data Siswa</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-gray-500 text-xl cursor-pointer hover:text-primary"></i>
+                        <span class="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full px-1.5 py-0.5">0</span>
+                    </div>
+                    <div class="flex items-center gap-3 border-l pl-4">
+                        <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-semibold text-gray-700">Admin Sibahah</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6">
+            <div class="max-w-7xl mx-auto">
+            <!-- Content Header -->
+            <div class="mb-6">
+                <p class="text-gray-600">Kelola data siswa aktif dan alumni</p>
+            </div>
+
+            <!-- Tombol Export -->
+            <div class="mb-6 flex justify-between items-center flex-wrap gap-3">
+                <div class="flex gap-2 flex-wrap">
+                    <input type="text" placeholder="Cari nama siswa..." id="searchInput" class="px-4 py-2 border rounded-lg text-sm" onkeyup="filterStudents()">
+                    <select id="statusFilter" class="px-4 py-2 border rounded-lg text-sm" onchange="filterStudents()">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+                <button onclick="exportStudentData()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                    <i class="fas fa-download"></i> Export Excel
+                </button>
+            </div>
+
+            <!-- Tabel Data Siswa -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">No</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Orang Tua</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">No. WA</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kelas</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Jadwal</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let studentsData = [];
+
+        // Fetch data dari API
+        async function fetchStudentsData() {
+            try {
+                const response = await fetch('/api/students');
+                const result = await response.json();
+                
+                if (result.success) {
+                    studentsData = result.data;
+                    console.log('Data siswa loaded:', studentsData);
+                    renderStudentsTable();
+                } else {
+                    console.error('Error:', result.message);
+                    showError('Gagal memuat data siswa');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showError('Error saat memuat data dari server');
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            if (status === 'SUDAH_BAYAR') return 'status-active';
+            return 'status-pending';
+        }
+
+        function getStatusDisplay(status) {
+            if (status === 'SUDAH_BAYAR') return 'Lunas';
+            return 'Belum Bayar';
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            
+            if (studentsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">Tidak ada data siswa</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = studentsData.map((s, idx) => `
+                <tr class="table-row-hover border-b hover:bg-gray-50 transition">
+                    <td class="px-6 py-3 text-sm">${idx + 1}</td>
+                    <td class="px-6 py-3 font-medium text-gray-900">${s.nama || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.ortu || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.wa || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.kelas || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.jadwal || '-'}</td>
+                    <td class="px-6 py-3">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(s.status_pembayaran)}">
+                            ${getStatusDisplay(s.status_pembayaran)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3 text-sm">
+                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Detail</button>
+                        <button onclick="editStudent(${s.id})" class="text-orange-600 hover:text-orange-800 font-medium text-xs">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterStudents() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const statusValue = document.getElementById('statusFilter').value;
+            
+            const filtered = studentsData.filter(s => {
+                const matchSearch = s.nama?.toLowerCase().includes(searchValue) || s.ortu?.toLowerCase().includes(searchValue);
+                const matchStatus = !statusValue || getStatusDisplay(s.status_pembayaran) === statusValue;
+                return matchSearch && matchStatus;
+            });
+
+            const tbody = document.getElementById('studentsTableBody');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">Tidak ada data yang cocok</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, idx) => `
+                <tr class="table-row-hover border-b hover:bg-gray-50 transition">
+                    <td class="px-6 py-3 text-sm">${idx + 1}</td>
+                    <td class="px-6 py-3 font-medium text-gray-900">${s.nama || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.ortu || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.wa || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.kelas || '-'}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.jadwal || '-'}</td>
+                    <td class="px-6 py-3">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(s.status_pembayaran)}">
+                            ${getStatusDisplay(s.status_pembayaran)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3 text-sm">
+                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Detail</button>
+                        <button onclick="editStudent(${s.id})" class="text-orange-600 hover:text-orange-800 font-medium text-xs">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewDetail(id) {
+            const student = studentsData.find(s => s.id === id);
+            if (!student) {
+                alert('Data siswa tidak ditemukan');
+                return;
+            }
+            window.open(`/admin/student-detail?id=${id}`, '_blank');
+        }
+
+        function editStudent(id) {
+            alert(`Fitur edit siswa untuk ID ${id} siap diimplementasikan.`);
+        }
+
+        function exportStudentData() {
+            if (studentsData.length === 0) {
+                alert('Tidak ada data untuk diexport');
+                return;
+            }
+            
+            let csv = "No,Nama,Orang Tua,No WA,Kelas,Jadwal,Gender,Usia,Status Pembayaran,Email,Tanggal Daftar\n";
+            studentsData.forEach((s, idx) => {
+                csv += `${idx + 1},"${s.nama || '-'}","${s.ortu || '-'}","${s.wa || '-'}","${s.kelas || '-'}","${s.jadwal || '-'}","${s.gender || '-'}","${s.usia || '-'}","${getStatusDisplay(s.status_pembayaran)}","${s.email || '-'}","${s.tanggal_daftar || '-'}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `data_siswa_${new Date().toISOString().split('T')[0]}.csv`);
+            link.click();
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">❌ ${message}</td></tr>`;
+        }
+
+        // Sidebar functions
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('closed');
+            document.getElementById('mobileOverlay').classList.add('hidden');
+        }
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('closed');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+        }
+        function toggleSidebar() {
+            if (document.getElementById('sidebar').classList.contains('closed')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        }
+        window.closeSidebar = closeSidebar;
+        window.toggleSidebar = toggleSidebar;
+
+        // Set active nav
+        function setActiveNav(pageId) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-primary/30', 'text-white');
+                link.classList.add('text-white/80');
+            });
+            const activeLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('bg-primary/30', 'text-white');
+            }
+        }
+
+        // Load data saat halaman dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStudentsData();
+            setActiveNav('students');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); });
+            });
+        });
+    </script>
+</body>
+</html>
+</body>
+</html>

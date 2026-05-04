@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pengaturan - Admin Sekolah Renang Sibahah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0) !important;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .settings-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-card i {
+            color: #0A66C2;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
+        <div class="p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
+                    <i class="fas fa-water text-white text-md"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                    <p class="text-white/50 text-xs">Sekolah Renang</p>
+                </div>
+            </div>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="py-6 px-4">
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="students">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </a>
+                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Pendaftaran Baru</span>
+                </a>
+                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Pembayaran</span>
+                </a>
+                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Jadwal Latihan</span>
+                </a>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Lainnya</p>
+                <a href="/admin/settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="settings">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="javascript:void(0)" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="md:ml-72 min-h-screen">
+        <!-- Header Top -->
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-2xl md:hidden" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-darkblue" id="pageTitle">Pengaturan</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-gray-500 text-xl cursor-pointer hover:text-primary"></i>
+                        <span class="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full px-1.5 py-0.5">0</span>
+                    </div>
+                    <div class="flex items-center gap-3 border-l pl-4">
+                        <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-semibold text-gray-700">Admin Sibahah</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6">
+            <div class="max-w-4xl mx-auto">
+            <!-- Content Description -->
+            <p class="text-gray-600">Kelola uang Pendaftaran dan Spp</p>
+
+            <!-- Tarif dan Biaya -->
+            <div class="settings-card">
+                <h3><i class="fas fa-money-bill"></i>Tarif dan Biaya</h3>
+                <form id="biayaForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Biaya Pendaftaran (Rp)</label>
+                            <input type="number" id="uangPendaftaran" min="0" step="1000" value="40000" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-primary focus:outline-none">
+                            <p class="text-xs text-gray-500 mt-1">Biaya saat calon siswa mendaftar</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">SPP Bulanan (Rp)</label>
+                            <input type="number" id="uangSpp" min="0" step="1000" value="100000" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-primary focus:outline-none">
+                            <p class="text-xs text-gray-500 mt-1">Biaya SPP per bulan latihan</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                        <textarea id="keteranganBiaya" placeholder="Contoh: Biaya standar sekolah renang Sibahah" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:border-primary focus:outline-none" rows="2"></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" id="saveBiayaBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-all flex items-center gap-2">
+                            <i class="fas fa-save"></i>Simpan Perubahan
+                        </button>
+                        <button type="button" onclick="loadBiaya()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600 transition-all flex items-center gap-2">
+                            <i class="fas fa-redo"></i>Reset
+                        </button>
+                    </div>
+                    <div id="biayaMessage" class="hidden p-3 rounded-lg text-sm"></div>
+                </form>
+            </div>
+
+            <!-- Notifikasi -->
+            <div class="settings-card">
+                <h3><i class="fas fa-bell"></i>Notifikasi</h3>
+                <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked class="w-4 h-4">
+                        <span class="text-sm text-gray-700">Notifikasi pendaftaran baru</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked class="w-4 h-4">
+                        <span class="text-sm text-gray-700">Notifikasi pembayaran diterima</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked class="w-4 h-4">
+                        <span class="text-sm text-gray-700">Notifikasi tagihan overdue</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4">
+                        <span class="text-sm text-gray-700">Email digest harian</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Backup dan Restore -->
+            <div class="settings-card">
+                <h3><i class="fas fa-database"></i>Backup dan Restore</h3>
+                <div class="space-y-3">
+                    <p class="text-sm text-gray-600">Backup data sekolah renang secara berkala</p>
+                    <div class="flex gap-3">
+                        <button onclick="backupData()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                            <i class="fas fa-download mr-2"></i>Backup Sekarang
+                        </button>
+                        <button class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">
+                            <i class="fas fa-upload mr-2"></i>Restore dari File
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Backup terakhir: 2025-01-15 10:30 AM</p>
+                </div>
+            </div>
+
+
+            <!-- About -->
+            <div class="settings-card text-center text-gray-600">
+                <p class="text-sm">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Sekolah Renang Sibahah Admin v1.0.0
+                </p>
+                <p class="text-xs mt-2">© 2025 - Semua hak dilindungi</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== BIAYA FUNCTIONS =====
+        async function loadBiaya() {
+            try {
+                const response = await fetch('/api/biaya');
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('uangPendaftaran').value = result.uang_pendaftaran || 40000;
+                    document.getElementById('uangSpp').value = result.uang_spp || 100000;
+                    document.getElementById('keteranganBiaya').value = result.keterangan || '';
+                }
+            } catch (error) {
+                console.error('Error loading biaya:', error);
+            }
+        }
+
+        async function saveBiaya(e) {
+            e.preventDefault();
+            
+            const uangPendaftaran = parseInt(document.getElementById('uangPendaftaran').value) || 0;
+            const uangSpp = parseInt(document.getElementById('uangSpp').value) || 0;
+            const keterangan = document.getElementById('keteranganBiaya').value.trim();
+            
+            const messageDiv = document.getElementById('biayaMessage');
+            const saveBtn = document.getElementById('saveBiayaBtn');
+            
+            // Validasi
+            if (uangPendaftaran <= 0 || uangSpp <= 0) {
+                messageDiv.className = 'block p-3 rounded-lg text-sm bg-red-100 text-red-700';
+                messageDiv.textContent = '❌ Biaya tidak boleh 0 atau negatif';
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Menyimpan...';
+            messageDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/biaya', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uang_pendaftaran: uangPendaftaran,
+                        uang_spp: uangSpp,
+                        keterangan: keterangan
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.className = 'block p-3 rounded-lg text-sm bg-green-100 text-green-700';
+                    messageDiv.textContent = '✓ Biaya berhasil diperbarui!';
+                } else {
+                    messageDiv.className = 'block p-3 rounded-lg text-sm bg-red-100 text-red-700';
+                    messageDiv.textContent = `❌ ${result.message}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'block p-3 rounded-lg text-sm bg-red-100 text-red-700';
+                messageDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i>Simpan Perubahan';
+            }
+        }
+
+        function backupData() {
+            alert('✓ Backup data berhasil dibuat!\n\nFile: backup_sibahah_2025-01-15.zip\nUkuran: 2.5 MB');
+        }
+
+        function resetDemoData() {
+            if (confirm('⚠️ Ini akan menghapus semua data demo!\n\nApakah Anda yakin?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Save settings to localStorage
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                const settings = {};
+                inputs.forEach(i => {
+                    settings[i.name || i.id || i.placeholder] = i.value;
+                });
+                localStorage.setItem('admin_settings', JSON.stringify(settings));
+            });
+        });
+
+        // Load settings from localStorage
+        const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+        inputs.forEach(input => {
+            const value = savedSettings[input.name || input.id || input.placeholder];
+            if (value) input.value = value;
+        });
+
+        // Sidebar functions
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('closed');
+            document.getElementById('mobileOverlay').classList.add('hidden');
+        }
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('closed');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+        }
+        function toggleSidebar() {
+            if (document.getElementById('sidebar').classList.contains('closed')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        }
+        window.closeSidebar = closeSidebar;
+        window.toggleSidebar = toggleSidebar;
+
+        // Set active nav
+        function setActiveNav(pageId) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-primary/30', 'text-white');
+                link.classList.add('text-white/80');
+            });
+            const activeLink = document.querySelector(`.nav-link[data-page=\"${pageId}\"]`);
+            if (activeLink) {
+                activeLink.classList.add('bg-primary/30', 'text-white');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBiaya();
+            setActiveNav('settings');
+            document.getElementById('biayaForm').addEventListener('submit', saveBiaya);
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); });
+            });
+        });
+    </script>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

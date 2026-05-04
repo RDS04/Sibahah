@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Form Pendaftaran - Sekolah Renang Sibahah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02)',
+                        'lift': '0 20px 25px -12px rgba(0, 0, 0, 0.1)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #0A66C2 0%, #00A8E8 100%);
+            transition: all 0.2s;
+        }
+        .btn-primary-gradient:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(10, 102, 194, 0.4);
+        }
+        .btn-success-gradient {
+            background: linear-gradient(95deg, #059669 0%, #10B981 100%);
+            transition: all 0.2s;
+        }
+        .btn-success-gradient:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.4);
+        }
+        /* Perbaikan utama: styling input dengan icon yang rapi */
+        .input-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0A66C2;
+            font-size: 1.1rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .input-icon input,
+        .input-icon select,
+        .input-icon textarea {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+        }
+        /* Untuk textarea tidak perlu padding kanan khusus */
+        .input-icon textarea {
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+        }
+        .input-icon input:focus,
+        .input-icon select:focus,
+        .input-icon textarea:focus {
+            outline: none;
+            border-color: #0A66C2;
+            box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
+            background-color: #F0F9FF;
+        }
+        /* Untuk select, panah tetap rapi */
+        .input-icon select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230A66C2' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 2.5rem;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #003459;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .required {
+            color: #EF4444;
+        }
+        .optional-badge {
+            font-size: 0.7rem;
+            background: #E0F2FE;
+            color: #0369A1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #003459;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #D1D5DB, transparent);
+            margin: 2rem 0;
+        }
+        .radio-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .radio-card:hover {
+            border-color: #0A66C2;
+            background-color: #F0F9FF;
+        }
+        .radio-card:has(input:checked) {
+            border-color: #0A66C2;
+            background-color: #EFF6FF;
+            box-shadow: 0 2px 8px rgba(10,102,194,0.1);
+        }
+        .jadwal-card {
+            transition: all 0.2s;
+        }
+        .gender-badge {
+            transition: all 0.2s;
+        }
+        /* Perbaikan ringkasan biaya */
+        .cost-summary {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E6F7FF 100%);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-air to-white min-h-screen py-12 px-4">
+    <div class="max-w-2xl mx-auto" id="daftar">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                <i class="fas fa-water text-3xl text-primary"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-darkblue mb-2">Pendaftaran Siswa Baru</h1>
+            <p class="text-gray-500 text-base md:text-lg">Sekolah Renang Sibahah — Pilih jadwal sesuai jenis kelamin</p>
+            <div class="flex items-center justify-center gap-3 mt-6">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                    <span class="ml-2 text-sm text-gray-600 hidden sm:inline">Isi Data</span>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-sm"></i>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <span class="ml-2 text-sm text-gray-600 hidden sm:inline">Konfirmasi</span>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-sm"></i>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <span class="ml-2 text-sm text-gray-600 hidden sm:inline">Pembayaran</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-3xl shadow-lift p-6 md:p-10 border border-blue-50">
+            <form id="registerForm">
+                <!-- Data Siswa -->
+                <div class="form-section-title">
+                    <i class="fas fa-user text-primary"></i>
+                    <span>Data Siswa</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Lengkap Anak <span class="required">*</span></label>
+                    <div class="input-icon">
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="nama" placeholder="Contoh: Ahmad Fauzi" required>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Usia Anak</label>
+                        <div class="input-icon">
+                            <i class="fas fa-calendar-days"></i>
+                            <input type="number" id="usia" placeholder="Usia (tahun)" min="4" max="18">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+                        <div class="flex gap-4 mt-2">
+                            <label class="flex items-center gap-2 cursor-pointer gender-badge">
+                                <input type="radio" name="gender" value="Laki-laki" class="w-4 h-4 accent-primary">
+                                <span class="text-gray-700"><i class="fas fa-mars text-blue-500"></i> Laki-laki</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer gender-badge">
+                                <input type="radio" name="gender" value="Perempuan" class="w-4 h-4 accent-pink-500">
+                                <span class="text-gray-700"><i class="fas fa-venus text-pink-500"></i> Perempuan</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Data Orang Tua -->
+                <div class="form-section-title">
+                    <i class="fas fa-phone text-primary"></i>
+                    <span>Data Orang Tua / Wali</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Orang Tua / Wali <span class="required">*</span></label>
+                    <div class="input-icon">
+                        <i class="fas fa-user-tie"></i>
+                        <input type="text" id="ortu" placeholder="Contoh: Bapak Ahmad" required>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">No. WhatsApp <span class="required">*</span></label>
+                        <div class="input-icon">
+                            <i class="fab fa-whatsapp"></i>
+                            <input type="tel" id="wa" placeholder="081234567890" required>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Aktif untuk konfirmasi</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email <span class="optional-badge">Opsional</span></label>
+                        <div class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" placeholder="email@contoh.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Program & Jadwal -->
+                <div class="form-section-title">
+                    <i class="fas fa-swimmer text-primary"></i>
+                    <span>Pilih Jadwal Sesuai Jenis Kelamin</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tingkat / Level <span class="required">*</span></label>
+                    <div class="input-icon">
+                        <i class="fas fa-layer-group"></i>
+                        <select id="kelas" required>
+                            <option value="">-- Pilih Tingkat --</option>
+                            <option value="Pemula">🏊 Pemula</option>
+                            <option value="Lanjutan">🏊‍♂️ Lanjutan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Pilih Jadwal Prioritas <span class="required">*</span></label>
+                    <div id="jadwalContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- dynamic cards -->
+                    </div>
+                    <div id="warningGenderJadwal" class="text-xs text-amber-600 mt-2 hidden">
+                        <i class="fas fa-info-circle"></i> Pilih jenis kelamin terlebih dahulu untuk melihat jadwal.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Catatan Tambahan <span class="optional-badge">Opsional</span></label>
+                    <div class="input-icon">
+                        <i class="fas fa-pen-alt"></i>
+                        <textarea id="catatan" rows="3" placeholder="Misal: anak punya kondisi khusus, alergi, atau informasi tambahan lainnya..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Ringkasan Biaya -->
+                <div class="cost-summary rounded-xl p-4 mb-6">
+                    <div class="flex justify-between items-center text-sm mb-2">
+                        <span class="text-gray-600">Biaya Pendaftaran:</span>
+                        <span class="font-semibold text-darkblue" id="displayUangPendaftaran">Rp40.000</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm mb-2">
+                        <span class="text-gray-600">SPP Bulanan (1 bulan):</span>
+                        <span class="font-semibold text-darkblue" id="displayUangSpp">Rp100.000</span>
+                    </div>
+                    <div class="border-t border-blue-200 my-2"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-darkblue">Total Pembayaran:</span>
+                        <span class="font-bold text-primary text-lg" id="totalBiaya">Rp140.000</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> Pembayaran dilakukan di halaman berikutnya.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                    <button type="button" id="whatsappBtn" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
+                        <i class="fab fa-whatsapp text-xl"></i> Kirim Data via WA
+                    </button>
+                    <button type="button" id="paymentBtn" class="flex-1 btn-success-gradient text-white font-bold py-3 rounded-xl text-lg transition-all flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-check-circle"></i> Daftar & Lanjut Pembayaran
+                    </button>
+                </div>
+                <p class="text-center text-xs text-gray-400 mt-5">
+                    <i class="fas fa-shield-alt text-primary"></i> Data aman. Jadwal otomatis sesuai jenis kelamin.
+                </p>
+            </form>
+        </div>
+
+        <!-- Info Jadwal -->
+        <div class="mt-8 bg-blue-50 border-l-4 border-primary rounded-lg p-5">
+            <div class="flex gap-3">
+                <i class="fas fa-info-circle text-primary text-xl mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-darkblue mb-1">📌 Jadwal Berdasarkan Jenis Kelamin (Sesuai Gambar)</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>👧 <strong>Kelas Putri :</strong> Selasa 16.00–17.00 · Jumat 14.00–15.00 · Sabtu Pagi 08.00–09.00 · Sabtu Sore 14.00–15.00</li>
+                        <li>👦 <strong>Kelas Putra :</strong> Selasa 17.00–18.00 · Jumat 15.00–16.00 · Sabtu Pagi 09.00–10.00 · Sabtu Sore 15.00–16.00</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Pembayaran -->
+        <div id="paymentModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden transition-all" style="backdrop-filter: blur(4px);">
+            <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-darkblue flex items-center gap-2"><i class="fas fa-wallet text-primary"></i> Ringkasan Pembayaran</h3>
+                    <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                
+                <!-- Ringkasan Biaya -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 mb-4 border border-blue-200">
+                    <div class="flex justify-between items-center text-sm mb-3">
+                        <span class="text-gray-700">Biaya Pendaftaran:</span>
+                        <span class="font-bold text-darkblue" id="modalUangPendaftaran">Rp40.000</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm mb-3">
+                        <span class="text-gray-700">SPP Bulanan (1 bulan):</span>
+                        <span class="font-bold text-darkblue" id="modalUangSpp">Rp100.000</span>
+                    </div>
+                    <div class="border-t border-blue-300 my-2"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-darkblue">Total Pembayaran:</span>
+                        <span class="font-bold text-primary text-lg" id="modalTotalBiaya">Rp140.000</span>
+                    </div>
+                </div>
+                
+                <p class="text-gray-500 text-sm mb-4">Pilih metode pembayaran yang sesuai. Data akan tersimpan otomatis.</p>
+                <div class="space-y-3 mb-6">
+                    <button onclick="processPayment('QRIS')" class="w-full flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-primary transition group">
+                        <div class="flex items-center gap-3"><i class="fas fa-qrcode text-2xl text-primary"></i><span class="font-medium">QRIS (Scan QR Code)</span></div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                    <button onclick="processPayment('Bank Transfer')" class="w-full flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-primary transition group">
+                        <div class="flex items-center gap-3"><i class="fas fa-university text-2xl text-primary"></i><span class="font-medium">Transfer Bank</span></div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                    <button onclick="processPayment('E-Wallet')" class="w-full flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-primary transition group">
+                        <div class="flex items-center gap-3"><i class="fas fa-mobile-alt text-2xl text-primary"></i><span class="font-medium">E-Wallet (Dana/OVO/GoPay)</span></div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== LOAD BIAYA DARI API =====
+        let biayaData = {
+            uang_pendaftaran: 40000,
+            uang_spp: 100000
+        };
+
+        async function loadBiayaFromAPI() {
+            try {
+                const response = await fetch('/api/biaya');
+                const result = await response.json();
+                
+                if (result.success) {
+                    biayaData.uang_pendaftaran = result.uang_pendaftaran || 40000;
+                    biayaData.uang_spp = result.uang_spp || 100000;
+                    updateBiayaDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading biaya:', error);
+                // Use default values
+                updateBiayaDisplay();
+            }
+        }
+
+        function updateBiayaDisplay() {
+            const formatRupiah = (num) => {
+                return 'Rp' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+            };
+
+            document.getElementById('displayUangPendaftaran').textContent = formatRupiah(biayaData.uang_pendaftaran);
+            document.getElementById('displayUangSpp').textContent = formatRupiah(biayaData.uang_spp);
+            
+            const total = biayaData.uang_pendaftaran + biayaData.uang_spp;
+            document.getElementById('totalBiaya').textContent = formatRupiah(total);
+            
+            // Update modal juga
+            document.getElementById('modalUangPendaftaran').textContent = formatRupiah(biayaData.uang_pendaftaran);
+            document.getElementById('modalUangSpp').textContent = formatRupiah(biayaData.uang_spp);
+            document.getElementById('modalTotalBiaya').textContent = formatRupiah(total);
+        }
+
+        // ===== JADWAL DATA =====
+        const jadwalMapping = {
+            "Laki-laki": [
+                { label: "Selasa Sore (Putra)", jam: "17.00 – 18.00", value: "Selasa Sore (17.00-18.00)" },
+                { label: "Jumat Sore (Putra)", jam: "15.00 – 16.00", value: "Jumat Sore (15.00-16.00)" },
+                { label: "Sabtu Pagi (Putra)", jam: "09.00 – 10.00", value: "Sabtu Pagi (09.00-10.00)" },
+                { label: "Sabtu Sore (Putra)", jam: "15.00 – 16.00", value: "Sabtu Sore (15.00-16.00)" }
+            ],
+            "Perempuan": [
+                { label: "Selasa Sore (Putri)", jam: "16.00 – 17.00", value: "Selasa Sore (16.00-17.00)" },
+                { label: "Jumat Sore (Putri)", jam: "14.00 – 15.00", value: "Jumat Sore (14.00-15.00)" },
+                { label: "Sabtu Pagi (Putri)", jam: "08.00 – 09.00", value: "Sabtu Pagi (08.00-09.00)" },
+                { label: "Sabtu Sore (Putri)", jam: "14.00 – 15.00", value: "Sabtu Sore (14.00-15.00)" }
+            ]
+        };
+
+        const jadwalContainer = document.getElementById('jadwalContainer');
+        const genderRadios = document.querySelectorAll('input[name="gender"]');
+        const warningDiv = document.getElementById('warningGenderJadwal');
+        let currentGender = '';
+
+        function renderJadwalByGender(gender) {
+            if (!gender || !jadwalMapping[gender]) {
+                jadwalContainer.innerHTML = `<div class="col-span-2 text-center py-4 text-gray-400 bg-gray-50 rounded-xl"><i class="fas fa-venus-mars"></i> Silakan pilih jenis kelamin untuk melihat jadwal</div>`;
+                warningDiv.classList.remove('hidden');
+                return;
+            }
+            warningDiv.classList.add('hidden');
+            const jadwalList = jadwalMapping[gender];
+            jadwalContainer.innerHTML = '';
+            jadwalList.forEach((item, idx) => {
+                const card = document.createElement('label');
+                card.className = `jadwal-card flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer transition radio-card`;
+                const radioId = `jadwal_${idx}`;
+                card.innerHTML = `
+                    <input type="radio" name="jadwal" value="${item.value}" id="${radioId}" class="w-4 h-4 accent-primary mr-2">
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-800">${item.label}</div>
+                        <p class="text-xs text-gray-500"><i class="far fa-clock"></i> ${item.jam}</p>
+                    </div>
+                `;
+                jadwalContainer.appendChild(card);
+            });
+        }
+
+        genderRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    currentGender = this.value;
+                    renderJadwalByGender(currentGender);
+                }
+            });
+        });
+
+        renderJadwalByGender(null);
+
+        // DOM elements
+        const namaInput = document.getElementById('nama');
+        const ortuInput = document.getElementById('ortu');
+        const waInput = document.getElementById('wa');
+        const kelasSelect = document.getElementById('kelas');
+        const usiaInput = document.getElementById('usia');
+        const emailInput = document.getElementById('email');
+        const catatanTextarea = document.getElementById('catatan');
+
+        function getFormData() {
+            let jadwalValue = '';
+            const selectedRadio = document.querySelector('input[name="jadwal"]:checked');
+            if (selectedRadio) jadwalValue = selectedRadio.value;
+            let genderValue = '';
+            for (let radio of genderRadios) {
+                if (radio.checked) { genderValue = radio.value; break; }
+            }
+            return {
+                nama: namaInput?.value.trim() || '',
+                ortu: ortuInput?.value.trim() || '',
+                wa: waInput?.value.trim() || '',
+                kelas: kelasSelect?.value || '',
+                jadwal: jadwalValue,
+                gender: genderValue,
+                usia: usiaInput?.value || '',
+                email: emailInput?.value.trim() || '',
+                catatan: catatanTextarea?.value.trim() || ''
+            };
+        }
+
+        function validateForm(showAlert = true) {
+            const data = getFormData();
+            const errors = [];
+            if (!data.nama) errors.push('Nama lengkap anak');
+            if (!data.ortu) errors.push('Nama orang tua / wali');
+            if (!data.wa) errors.push('No. WhatsApp');
+            if (!data.kelas) errors.push('Pilih tingkat kelas');
+            if (!data.jadwal) errors.push('Pilih jadwal');
+            if (!data.gender) errors.push('Jenis kelamin');
+            if (data.wa && !/^[0-9]{10,13}$/.test(data.wa)) errors.push('No. WhatsApp harus 10-13 digit angka');
+            if (data.gender && data.jadwal) {
+                const validJadwalValues = jadwalMapping[data.gender]?.map(j => j.value) || [];
+                if (validJadwalValues.length && !validJadwalValues.includes(data.jadwal)) {
+                    errors.push(`Jadwal tidak sesuai dengan gender ${data.gender}. Silakan pilih ulang.`);
+                }
+            }
+            if (errors.length > 0 && showAlert) {
+                alert('⚠️ Harap lengkapi data:\n- ' + errors.join('\n- '));
+                return false;
+            }
+            return errors.length === 0;
+        }
+
+        function sendToWhatsApp() {
+            if (!validateForm(true)) return;
+            const data = getFormData();
+            const message = `*Pendaftaran Sekolah Renang Sibahah*%0A%0A*Data Siswa*%0ANama: ${data.nama}%0AJenis Kelamin: ${data.gender}%0AUsia: ${data.usia || '-'} tahun%0ALevel: ${data.kelas}%0AJadwal: ${data.jadwal}%0A%0A*Data Orang Tua*%0ANama Wali: ${data.ortu}%0AWhatsApp: ${data.wa}%0AEmail: ${data.email || '-'}%0A%0A*Catatan:* ${data.catatan || '-'}%0A---%0AMohon konfirmasi pendaftaran.`;
+            window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
+        }
+
+        function storeFormDataForPayment() {
+            if (!validateForm(true)) return false;
+            const data = getFormData();
+            localStorage.setItem('sibahah_registration', JSON.stringify(data));
+            return true;
+        }
+
+        function proceedToPayment() {
+            if (!validateForm(true)) return;
+            
+            const data = getFormData();
+            
+            // Tampilkan loading
+            const paymentBtn = document.getElementById('paymentBtn');
+            const originalText = paymentBtn.innerHTML;
+            paymentBtn.disabled = true;
+            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            
+            // Kirim data ke backend
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Simpan ke localStorage sebelum redirect
+                    localStorage.setItem('sibahah_registration', JSON.stringify(data));
+                    
+                    // Tampilkan notifikasi sukses
+                    const successDiv = document.createElement('div');
+                    successDiv.style.position = 'fixed';
+                    successDiv.style.top = '20px';
+                    successDiv.style.right = '20px';
+                    successDiv.style.background = '#10B981';
+                    successDiv.style.color = 'white';
+                    successDiv.style.padding = '16px 24px';
+                    successDiv.style.borderRadius = '8px';
+                    successDiv.style.zIndex = '9999';
+                    successDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    successDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    document.body.appendChild(successDiv);
+                    
+                    // Redirect ke pembayaran setelah 1.5 detik
+                    setTimeout(() => {
+                        window.location.href = '/pembayaran';
+                    }, 1500);
+                } else {
+                    paymentBtn.disabled = false;
+                    paymentBtn.innerHTML = originalText;
+                    alert('❌ ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                paymentBtn.disabled = false;
+                paymentBtn.innerHTML = originalText;
+                alert('❌ Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+            });
+        }
+
+        const modal = document.getElementById('paymentModal');
+        function showPaymentModal() { modal.classList.remove('hidden'); }
+        window.closePaymentModal = function () { modal.classList.add('hidden'); };
+
+        window.processPayment = function (method) {
+            modal.classList.add('hidden');
+            const data = getFormData();
+            const instruksiDiv = document.createElement('div');
+            instruksiDiv.style.position = 'fixed';
+            instruksiDiv.style.top = '0';
+            instruksiDiv.style.left = '0';
+            instruksiDiv.style.width = '100%';
+            instruksiDiv.style.height = '100%';
+            instruksiDiv.style.background = 'white';
+            instruksiDiv.style.zIndex = '9999';
+            instruksiDiv.style.overflowY = 'auto';
+            instruksiDiv.style.padding = '2rem';
+            instruksiDiv.style.fontFamily = 'sans-serif';
+            instruksiDiv.innerHTML = `
+                <div style="max-width:500px; margin:auto; background:white; border-radius:32px; padding:2rem; text-align:center; box-shadow:0 20px 35px -8px rgba(0,0,0,0.2);">
+                    <i class="fas fa-check-circle" style="font-size:4rem; color:#10B981;"></i>
+                    <h2 style="font-size:1.75rem; font-weight:bold; margin-top:1rem;">Pendaftaran Siap!</h2>
+                    <p style="color:#4B5563; margin-top:0.5rem;">Data telah terekam. Lakukan pembayaran pendaftaran <strong>Rp40.000</strong> via:</p>
+                    <div style="background:#F3F4F6; padding:1rem; border-radius:16px; margin:1.5rem 0;">
+                        <p style="font-weight:bold; color:#003459;"><i class="fas ${method === 'QRIS' ? 'fa-qrcode' : (method === 'Bank Transfer' ? 'fa-university' : 'fa-mobile-alt')}"></i> ${method}</p>
+                        <p style="font-size:0.9rem; margin-top:0.5rem;">Instruksi pembayaran akan dikirim ke WhatsApp Anda.</p>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666;">Silakan cek WhatsApp <strong>${data.wa}</strong> untuk detail pembayaran.</p>
+                    <div style="display:flex; gap:12px; margin-top:24px;">
+                        <button onclick="window.location.href='https://wa.me/6281234567890?text=Halo%20Admin%2C%20saya%20${encodeURIComponent(data.nama)}%20(Wali%3A%20${encodeURIComponent(data.ortu)})%20telah%20mendaftar%20dengan%20jadwal%20${encodeURIComponent(data.jadwal)}%20metode%20${encodeURIComponent(method)}'" style="flex:1; background:#25D366; color:white; padding:12px; border-radius:40px; border:none; font-weight:bold;">Hubungi Admin</button>
+                        <button onclick="this.closest('div').parentElement.remove()" style="flex:1; background:#E5E7EB; color:#374151; padding:12px; border-radius:40px; border:none; font-weight:bold;">Tutup</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3">Setelah transfer, konfirmasi ke admin untuk aktivasi kelas.</p>
+                </div>
+            `;
+            document.body.appendChild(instruksiDiv);
+        };
+
+        document.getElementById('whatsappBtn')?.addEventListener('click', sendToWhatsApp);
+        document.getElementById('paymentBtn')?.addEventListener('click', proceedToPayment);
+
+        waInput?.addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^\d]/g, '').slice(0, 13);
+        });
+
+        const checkedGender = document.querySelector('input[name="gender"]:checked');
+        if (checkedGender) {
+            currentGender = checkedGender.value;
+            renderJadwalByGender(currentGender);
+        }
+
+        // Load biaya saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', loadBiayaFromAPI);
+    </script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Jadwal Latihan - Admin Sekolah Renang Sibahah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0) !important;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .schedule-card {
+            border-left: 4px solid;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .schedule-putra { border-left-color: #0A66C2; }
+        .schedule-putri { border-left-color: #F4A261; }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
+        <div class="p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
+                    <i class="fas fa-water text-white text-md"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                    <p class="text-white/50 text-xs">Sekolah Renang</p>
+                </div>
+            </div>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="py-6 px-4">
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="students">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </a>
+                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Pendaftaran Baru</span>
+                </a>
+                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Pembayaran</span>
+                </a>
+                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="schedule">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Jadwal Latihan</span>
+                </a>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Lainnya</p>
+                <a href="/admin/settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="settings">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="javascript:void(0)" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="md:ml-72 min-h-screen">
+        <!-- Header Top -->
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-2xl md:hidden" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-darkblue" id="pageTitle">Jadwal Latihan</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-gray-500 text-xl cursor-pointer hover:text-primary"></i>
+                        <span class="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full px-1.5 py-0.5">0</span>
+                    </div>
+                    <div class="flex items-center gap-3 border-l pl-4">
+                        <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-semibold text-gray-700">Admin Sibahah</p>
+                            <p class="text-xs text-gray-400">Super Admin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6">
+            <div class="max-w-7xl mx-auto">
+            <!-- Content Description -->
+            <p class="text-gray-600">Kelola dan lihat jadwal latihan semua kelas</p>
+
+            <!-- Tombol Tambah Jadwal -->
+            <div class="mb-6">
+                <button onclick="openAddScheduleModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                    <i class="fas fa-plus"></i> Tambah Jadwal
+                </button>
+            </div>
+
+            <!-- Jadwal Minggu -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- KELAS PUTRA -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        <i class="fas fa-male text-blue-600 mr-2"></i>Jadwal Putra
+                    </h2>
+                    <div class="space-y-4" id="putraSchedule"></div>
+                </div>
+
+                <!-- KELAS PUTRI -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        <i class="fas fa-female text-orange-600 mr-2"></i>Jadwal Putri
+                    </h2>
+                    <div class="space-y-4" id="putriSchedule"></div>
+                </div>
+            </div>
+
+            <!-- Tabel Semua Jadwal -->
+            <div class="mt-10 bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="px-6 py-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">📋 Daftar Lengkap Jadwal</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Hari</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Jam</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kelas</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Jenis</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Peserta</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Instruktur</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Jadwal -->
+    <div id="addScheduleModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6">
+            <h2 class="text-xl font-bold mb-4">Tambah Jadwal Baru</h2>
+            <div class="space-y-3">
+                <input type="text" placeholder="Hari (Selasa, Jumat, Sabtu)" id="newDay" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" placeholder="Jam (08:00 - 09:00)" id="newTime" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" placeholder="Kelas (Pemula, Lanjutan)" id="newClass" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="newType" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    <option value="">Pilih Jenis</option>
+                    <option value="Putra">Putra</option>
+                    <option value="Putri">Putri</option>
+                </select>
+                <input type="text" placeholder="Instruktur" id="newInstructor" class="w-full px-3 py-2 border rounded-lg text-sm">
+            </div>
+            <div class="flex gap-3 mt-6 justify-end">
+                <button onclick="closeAddScheduleModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Batal</button>
+                <button onclick="addNewSchedule()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let schedulesData = [
+            { id: 1, hari: "Selasa", jam: "17:00 - 18:00", kelas: "Pemula", jenis: "Putra", peserta: 8, instruktur: "Pak Budi" },
+            { id: 2, hari: "Jumat", jam: "15:00 - 16:00", kelas: "Pemula", jenis: "Putra", peserta: 7, instruktur: "Pak Rudi" },
+            { id: 3, hari: "Sabtu", jam: "09:00 - 10:00", kelas: "Pemula", jenis: "Putra", peserta: 6, instruktur: "Pak Budi" },
+            { id: 4, hari: "Sabtu", jam: "15:00 - 16:00", kelas: "Lanjutan", jenis: "Putra", peserta: 5, instruktur: "Pak Rudi" },
+            
+            { id: 5, hari: "Selasa", jam: "16:00 - 17:00", kelas: "Pemula", jenis: "Putri", peserta: 9, instruktur: "Ibu Siti" },
+            { id: 6, hari: "Jumat", jam: "14:00 - 15:00", kelas: "Pemula", jenis: "Putri", peserta: 10, instruktur: "Ibu Dewi" },
+            { id: 7, hari: "Sabtu", jam: "08:00 - 09:00", kelas: "Pemula", jenis: "Putri", peserta: 8, instruktur: "Ibu Siti" },
+            { id: 8, hari: "Sabtu", jam: "14:00 - 15:00", kelas: "Lanjutan", jenis: "Putri", peserta: 6, instruktur: "Ibu Dewi" },
+        ];
+
+        function renderScheduleCards() {
+            const putraContainer = document.getElementById('putraSchedule');
+            const putriContainer = document.getElementById('putriSchedule');
+
+            const putraData = schedulesData.filter(s => s.jenis === 'Putra');
+            const putriData = schedulesData.filter(s => s.jenis === 'Putri');
+
+            putraContainer.innerHTML = putraData.map(s => `
+                <div class="schedule-card schedule-putra">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam}</h4>
+                            <p class="text-sm text-gray-600">Kelas ${s.kelas}</p>
+                        </div>
+                        <button onclick="deleteSchedule(${s.id})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-4 text-sm text-gray-700 mt-3">
+                        <div><i class="fas fa-users text-blue-600 mr-1"></i>${s.peserta} siswa</div>
+                        <div><i class="fas fa-user-tie text-blue-600 mr-1"></i>${s.instruktur}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            putriContainer.innerHTML = putriData.map(s => `
+                <div class="schedule-card schedule-putri">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam}</h4>
+                            <p class="text-sm text-gray-600">Kelas ${s.kelas}</p>
+                        </div>
+                        <button onclick="deleteSchedule(${s.id})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-4 text-sm text-gray-700 mt-3">
+                        <div><i class="fas fa-users text-orange-600 mr-1"></i>${s.peserta} siswa</div>
+                        <div><i class="fas fa-user-tie text-orange-600 mr-1"></i>${s.instruktur}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderScheduleTable() {
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = schedulesData.map(s => `
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="px-6 py-3 font-medium text-gray-900">${s.hari}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.jam}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.kelas}</td>
+                    <td class="px-6 py-3">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${s.jenis === 'Putra' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">
+                            ${s.jenis}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.peserta}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.instruktur}</td>
+                    <td class="px-6 py-3 text-sm">
+                        <button onclick="editSchedule(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Edit</button>
+                        <button onclick="deleteSchedule(${s.id})" class="text-red-600 hover:text-red-800 font-medium text-xs">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddScheduleModal() {
+            document.getElementById('addScheduleModal').classList.remove('hidden');
+        }
+
+        function closeAddScheduleModal() {
+            document.getElementById('addScheduleModal').classList.add('hidden');
+            document.getElementById('newDay').value = '';
+            document.getElementById('newTime').value = '';
+            document.getElementById('newClass').value = '';
+            document.getElementById('newType').value = '';
+            document.getElementById('newInstructor').value = '';
+        }
+
+        function addNewSchedule() {
+            const day = document.getElementById('newDay').value.trim();
+            const time = document.getElementById('newTime').value.trim();
+            const kelas = document.getElementById('newClass').value.trim();
+            const type = document.getElementById('newType').value;
+            const instructor = document.getElementById('newInstructor').value.trim();
+
+            if (!day || !time || !kelas || !type || !instructor) {
+                alert('Semua field harus diisi!');
+                return;
+            }
+
+            const newSchedule = {
+                id: Math.max(...schedulesData.map(s => s.id), 0) + 1,
+                hari: day,
+                jam: time,
+                kelas: kelas,
+                jenis: type,
+                peserta: 0,
+                instruktur: instructor
+            };
+
+            schedulesData.push(newSchedule);
+            renderScheduleCards();
+            renderScheduleTable();
+            closeAddScheduleModal();
+            alert('✓ Jadwal berhasil ditambahkan!');
+        }
+
+        function editSchedule(id) {
+            const schedule = schedulesData.find(s => s.id === id);
+            alert(`Edit jadwal ${schedule.hari} ${schedule.jam} - Fitur edit siap diimplementasikan`);
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('Yakin ingin menghapus jadwal ini?')) {
+                schedulesData = schedulesData.filter(s => s.id !== id);
+                renderScheduleCards();
+                renderScheduleTable();
+                alert('✓ Jadwal telah dihapus!');
+            }
+        }
+
+        // Sidebar functions
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('closed');
+            document.getElementById('mobileOverlay').classList.add('hidden');
+        }
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('closed');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+        }
+        function toggleSidebar() {
+            if (document.getElementById('sidebar').classList.contains('closed')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        }
+        window.closeSidebar = closeSidebar;
+        window.toggleSidebar = toggleSidebar;
+
+        // Set active nav
+        function setActiveNav(pageId) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-primary/30', 'text-white');
+                link.classList.add('text-white/80');
+            });
+            const activeLink = document.querySelector(`.nav-link[data-page=\"${pageId}\"]`);
+            if (activeLink) {
+                activeLink.classList.add('bg-primary/30', 'text-white');
+            }
+        }
+
+        renderScheduleCards();
+        renderScheduleTable();
+        setActiveNav('schedule');
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); });
+        });
+    </script>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

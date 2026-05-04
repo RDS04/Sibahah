@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sekolah Renang Sibahah | Bisa, Yakin, Mampu | Galeri & Pendaftaran</title>
+    <!-- Tailwind CSS v3 + Google Fonts + Font Awesome Icons + Lightbox (Simple) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02)',
+                        'lift': '0 20px 25px -12px rgba(0, 0, 0, 0.1)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* smooth scroll & galeri hover effect */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #0A66C2 0%, #00A8E8 100%);
+            transition: all 0.2s;
+        }
+
+        .btn-primary-gradient:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(10, 102, 194, 0.4);
+        }
+
+        /* lightbox modal sederhana */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 85%;
+            border-radius: 1rem;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close-lightbox:hover {
+            color: #00A8E8;
+        }
+    </style>
+</head>
+
+<body class="bg-air font-sans">
+
+    <!-- LIGHTBOX MODAL (Galeri Popup) -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="Preview Foto Renang">
+    </div>
+
+    <!-- HERO SECTION -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <nav class="relative z-10 flex justify-between items-center max-w-6xl mx-auto px-5 py-4 flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary w-8 h-8 rounded-full flex items-center justify-center shadow-md">
+                    <i class="fas fa-water text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-xl text-darkblue tracking-tight">Sibahah<span
+                        class="text-primary">|Renang</span></span>
+            </div>
+            <div class="flex gap-2 text-sm font-medium items-center flex-wrap justify-end">
+                <a href="#jadwal"
+                    class="hidden md:inline-block text-gray-600 hover:text-primary transition px-3 py-2">Jadwal</a>
+                <a href="#program"
+                    class="hidden md:inline-block text-gray-600 hover:text-primary transition px-3 py-2">Program</a>
+                <a href="#galeri"
+                    class="hidden md:inline-block text-gray-600 hover:text-primary transition px-3 py-2">Galeri</a>
+                <a href="#biaya"
+                    class="hidden md:inline-block text-gray-600 hover:text-primary transition px-3 py-2">Biaya</a>
+                <a href="/pendaftaran"
+                    class="bg-primary text-white px-4 py-2 rounded-full shadow-md hover:bg-darkblue transition text-sm"><i
+                        class="fas fa-phone-alt mr-1"></i> Daftar</a>
+                <a href="/riwayat" 
+                    class="border-2 border-primary text-primary px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition text-sm font-medium"><i
+                        class="fas fa-history mr-1"></i> Riwayat</a>
+            </div>
+        </nav>
+
+        <div class="relative max-w-6xl mx-auto px-5 py-8 md:py-16 flex flex-col md:flex-row items-center gap-10">
+            <div class="flex-1 text-center md:text-left">
+                <div
+                    class="inline-flex items-center gap-2 bg-blue-100 rounded-full px-4 py-1 text-primary text-sm font-semibold mb-4">
+                    <i class="fas fa-star-of-life text-xs"></i> <span>Kuota Terbatas! Segera Gabung</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-darkblue">SEKOLAH RENANG
+                    <span class="text-primary">SIBAHAH</span>
+                </h1>
+                <div class="flex justify-center md:justify-start gap-2 mt-2"><span
+                        class="bg-accent/20 text-accentDark px-3 py-1 rounded-full text-sm font-semibold">🏊 “Bisa,
+                        Yakin, Mampu”</span></div>
+                <p class="mt-5 text-gray-600 text-lg max-w-lg md:max-w-full">Program renang eksklusif putra & putri.
+                    Instruktur profesional, kolam bersih, keamanan prioritas utama. <strong
+                        class="text-primary">Pendaftaran hanya Rp40.000!</strong></p>
+                <div class="flex flex-wrap gap-4 mt-7 justify-center md:justify-start">
+                    <a href="#daftar"
+                        class="btn-primary-gradient text-white px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2"><i
+                            class="fas fa-swimmer"></i> Daftar Reguler</a>
+                    <a href="#galeri"
+                        class="border-2 border-primary text-primary px-6 py-3 rounded-full font-semibold hover:bg-primary hover:text-white transition"><i
+                            class="fas fa-images"></i> Lihat Galeri</a>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-8 max-w-sm mx-auto md:mx-0">
+                    <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-soft text-center"><i
+                            class="fas fa-user-check text-primary text-2xl"></i>
+                        <h3 class="font-bold text-darkblue">Instruktur Berlisensi</h3>
+                    </div>
+                    <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-soft text-center"><i
+                            class="fas fa-shield-alt text-primary text-2xl"></i>
+                        <h3 class="font-bold text-darkblue">Keamanan Anak Prioritas Utama</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 flex justify-center">
+                <div
+                    class="relative w-64 h-64 md:w-80 md:h-80 bg-primary/10 rounded-full flex items-center justify-center">
+                    <div
+                        class="absolute w-48 h-48 bg-white rounded-full shadow-xl flex flex-col items-center justify-center">
+                        <i class="fas fa-swimmer text-6xl text-primary"></i><span
+                            class="font-bold text-darkblue mt-2">Belajar Sambil Main Air</span>
+                    </div>
+                    <div
+                        class="absolute -bottom-4 -right-4 bg-accent text-white p-3 rounded-full shadow-lg text-sm font-bold animate-pulse">
+                        HOT PROMO</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENGAPA MEMILIH KAMI (SINGKAT) -->
+    <div class="max-w-6xl mx-auto px-5 py-12" id="program">
+        <div class="text-center mb-10"><i class="fas fa-medal text-primary text-3xl"></i>
+            <h2 class="text-3xl font-bold text-darkblue mt-2">Mengapa Memilih Kami?</h2>
+            <div class="w-24 h-1 bg-accent mx-auto mt-3 rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-2xl shadow-soft p-6 card-hover text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i
+                        class="fas fa-child text-primary text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-darkblue">Keamanan Anak Prioritas Utama</h3>
+                <p class="text-gray-500 mt-2">Lingkungan kolam aman, pengawasan ketat.</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-6 card-hover text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i
+                        class="fas fa-chalkboard-user text-primary text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-darkblue">Instruktur Berpengalaman</h3>
+                <p class="text-gray-500 mt-2">Lisensi resmi, pendekatan sabar & ramah anak.</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-6 card-hover text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i
+                        class="fas fa-users text-primary text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-darkblue">Komunitas Kecil yang Akrab</h3>
+                <p class="text-gray-500 mt-2">Kelas terbatas, perhatian personal, suasana kekeluargaan.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALERI FOTO RENANG (NEW SECTION) -->
+    <div class="py-12 bg-white" id="galeri">
+        <div class="max-w-6xl mx-auto px-5">
+            <div class="text-center mb-10">
+                <i class="fas fa-camera-retro text-primary text-3xl"></i>
+                <h2 class="text-3xl font-bold text-darkblue mt-2">🏊‍♀️ Galeri Momen Seru Berenang 🏊‍♂️</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">Dokumentasi latihan, suasana kolam, dan kebersamaan kelas
+                    renang Sibahah.</p>
+                <div class="w-20 h-1 bg-accent mx-auto mt-3 rounded-full"></div>
+            </div>
+
+            <!-- Grid galeri dengan placeholder gambar (unsplash/illustrasi swimming) menggunakan placeholder image yang relevan. 
+           Karena gambar asli tidak disediakan, kita gunakan gambar dari sumber free stock tentang renang, namun tetap menampilkan kesan profesional.
+           SEMUA GAMBAR BERSIFAT DEMO (UNSPLASH) - bisa diganti dengan foto asli nanti. -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                <!-- item 1 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/1.jpeg')">
+                    <img src="/static/image/1.jpeg" alt="Galeri 1" class="w-full h-full aspect-square object-cover">
+                </div>
+                <!-- item 2 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/2.jpeg')">
+                    <img src="/static/image/2.jpeg" alt="Galeri 2" class="w-full h-full aspect-square object-cover">
+                </div>
+                <!-- item 3 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/3.jpeg')">
+                    <img src="/static/image/3.jpeg" alt="Galeri 3" class="w-full h-full aspect-square object-cover">
+                </div>
+                <!-- item 4 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/4.jpeg')">
+                    <img src="/static/image/4.jpeg" alt="Galeri 4" class="w-full h-full aspect-square object-cover">
+                </div>
+                <!-- item 5 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/5.jpeg')">
+                    <img src="/static/image/5.jpeg" alt="Galeri 5" class="w-full h-full aspect-square object-cover">
+                </div>
+                <!-- item 6 -->
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/6.jpeg')">
+                    <img src="/static/image/6.jpeg" alt="Galeri 6" class="w-full h-full aspect-square object-cover">
+                </div>
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/7.jpeg')">
+                    <img src="/static/image/7.jpeg" alt="Galeri 7" class="w-full h-full aspect-square object-cover">
+                </div>
+                <div class="gallery-item bg-gray-100 rounded-lg overflow-hidden shadow-md cursor-pointer"
+                    onclick="openLightbox('/static/image/8.jpeg')">
+                    <img src="/static/image/8.jpeg" alt="Galeri 8" class="w-full h-full aspect-square object-cover">
+                </div>
+            </div>
+            <div class="text-center mt-6 text-sm text-gray-500"><i class="fas fa-mouse"></i> Klik foto untuk melihat
+                versi penuh</div>
+        </div>
+    </div>
+
+    <!-- JADWAL LENGKAP -->
+    <div class="bg-white py-12" id="jadwal">
+        <div class="max-w-6xl mx-auto px-5">
+            <div class="text-center mb-8"><i class="far fa-clock text-primary text-3xl"></i>
+                <h2 class="text-3xl font-bold text-darkblue mt-2">Jadwal Yang Tersedia</h2>
+                <p class="text-gray-500">Latihan 1x seminggu | 4x dalam sebulan | Kuota terbatas!</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-lg p-5 border border-blue-100">
+                    <div class="flex items-center gap-2 border-b pb-3 mb-4"><i
+                            class="fas fa-calendar-week text-primary text-2xl"></i>
+                        <h3 class="text-2xl font-bold text-darkblue">Selasa & Jumat Sore</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white shadow-sm">
+                            <div><i class="fas fa-female text-pink-500 mr-2"></i><span class="font-semibold">Kelas
+                                    Putri</span></div>
+                            <div class="text-primary font-bold">16.00 - 17.00</div>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white shadow-sm">
+                            <div><i class="fas fa-male text-blue-600 mr-2"></i><span class="font-semibold">Kelas
+                                    Putra</span></div>
+                            <div class="text-primary font-bold">17.00 - 18.00</div>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-dashed border-gray-200">
+                        <p class="font-semibold text-primary"><i class="fas fa-clock"></i> Jumat Sore (sesi tambahan):
+                        </p>
+                        <div class="flex justify-between mt-1 text-sm"><span>Kelas Putri: 14.00 -
+                                15.00</span><span>Kelas Putra: 15.00 - 16.00</span></div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-teal-50 to-white rounded-2xl shadow-lg p-5 border border-teal-100">
+                    <div class="flex items-center gap-2 border-b pb-3 mb-4"><i
+                            class="fas fa-sun text-accent text-2xl"></i>
+                        <h3 class="text-2xl font-bold text-darkblue">Sabtu Pagi & Sore</h3>
+                    </div>
+                    <div class="mb-4">
+                        <div class="bg-accent/10 p-2 rounded-lg mb-3 text-center italic text-accentDark">“Belajar Sambil
+                            Main Air”</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white rounded-md p-2 text-center shadow-sm"><span class="font-bold">Sabtu
+                                    Pagi</span><br><span class="text-primary">Putri 08.00-09.00</span><br><span
+                                    class="text-darkblue">Putra 09.00-10.00</span></div>
+                            <div class="bg-white rounded-md p-2 text-center shadow-sm"><span class="font-bold">Sabtu
+                                    Sore</span><br><span class="text-primary">Putri 14.00-15.00</span><br><span
+                                    class="text-darkblue">Putra 15.00-16.00</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIAYA & PENDAFTARAN -->
+    <div class="py-12" id="biaya">
+        <div class="max-w-5xl mx-auto px-5">
+            <div class="bg-white rounded-3xl shadow-lift overflow-hidden">
+                <div class="bg-darkblue text-white py-4 px-6 text-center">
+                    <h2 class="text-2xl font-bold">💰 Biaya Kursus Renang</h2>
+                    <p>Investasi untuk kemampuan berenang & kepercayaan diri</p>
+                </div>
+                <div class="p-6 md:p-8 grid md:grid-cols-2 gap-8">
+                    <div class="border-r border-gray-200 pr-6">
+                        <div class="text-4xl font-extrabold text-primary">Rp40.000</div>
+                        <p class="text-gray-500">Pendaftaran (Kelas Reguler) <i
+                                class="fas fa-check-circle text-green-500"></i></p>
+                        <hr class="my-4">
+                        <div class="flex items-baseline gap-2 mt-2"><span
+                                class="text-2xl font-bold text-darkblue">Rp160.000</span><span class="text-gray-500">/
+                                bulan</span></div>
+                        <p class="text-sm text-gray-500 mt-1">SPP Bulanan <strong class="text-primary">SUDAH TERMASUK
+                                UANG KOLAM</strong></p>
+                        <ul class="mt-5 space-y-2">
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-secondary"></i> 4x
+                                pertemuan per bulan (1x seminggu)</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-secondary"></i>
+                                Perlengkapan latihan tersedia</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-secondary"></i>
+                                Sertifikat setelah mahir</li>
+                        </ul>
+                    </div>
+                    <div class="bg-air rounded-2xl p-5">
+                        <div class="flex items-center gap-2 mb-3"><i class="fas fa-gem text-primary text-xl"></i>
+                            <h3 class="font-bold text-xl">Keuntungan Gabung Sekarang</h3>
+                        </div>
+                        <ul class="space-y-3">
+                            <li><i class="fas fa-tachometer-alt text-accent w-5"></i> Kuota terbatas hanya 10
+                                siswa/kelas</li>
+                            <li><i class="fas fa-chalkboard text-accent"></i> Program latihan terstruktur & progresif
+                            </li>
+                            <li><i class="fas fa-hand-holding-heart text-accent"></i> Instruktur sabar khusus pemula
+                            </li>
+                            <li><i class="fas fa-clock text-accent"></i> Jadwal fleksibel pilih sesuai sesi</li>
+                        </ul>
+                        <div class="mt-6 text-center"><span
+                                class="bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium">🚨 Kuota
+                                Terbatas! Daftar Hari Ini</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM PENDAFTARAN -->
+
+
+    <footer class="bg-wave-footer text-white py-8 mt-10"
+        style="background: linear-gradient(135deg, #003459 0%, #0A66C2 100%);">
+        <div class="max-w-6xl mx-auto px-5 text-center">
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/20 pb-5 mb-5">
+                <div class="flex items-center gap-2 mx-auto md:mx-0"><i class="fas fa-water text-2xl"></i><span
+                        class="font-bold text-xl">SEKOLAH RENANG SIBAHAH</span></div>
+                <div class="text-sm italic">“Bisa, Yakin, Mampu & Berkarakter”</div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4 text-sm text-left text-white/80">
+                <div><i class="fas fa-map-marker-alt mr-2"></i> Kolam Renang HR Bukhari Muslim - Kota Medan</div>
+                <div><i class="fas fa-phone-alt mr-2"></i> +62 812 3456 7890 (Admin)</div>
+                <div><i class="fab fa-instagram mr-2"></i> @sibahah_renang</div>
+            </div>
+            <div class="text-xs text-white/60 mt-6">© 2026 Sibahah Swimming School | Program Latihan Terstruktur Putra
+                Putri Terpisah. Keamanan Anak Prioritas Utama.</div>
+        </div>
+    </footer>
+
+    <script>
+        // Lightbox Functions
+        function openLightbox(imageSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = imageSrc;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        }
+
+        // Close lightbox when pressing Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+
+</html>

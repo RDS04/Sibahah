@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Riwayat & Status Siswa - Sekolah Renang Sibahah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .status-pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="bg-darkblue text-white py-4 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-6xl mx-auto px-5 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fas fa-water text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-xl">Sibahah<span class="text-secondary">|Renang</span></span>
+            </div>
+            <div class="flex gap-3">
+                <a href="/" class="text-white/80 hover:text-white px-3 py-2 text-sm"><i class="fas fa-home mr-1"></i> Beranda</a>
+                <a href="/pendaftaran" class="bg-primary text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700"><i class="fas fa-user-plus mr-1"></i> Daftar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="max-w-4xl mx-auto px-5 py-12">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white p-6">
+                <h1 class="text-3xl font-bold flex items-center gap-2">
+                    <i class="fas fa-history text-2xl"></i>Riwayat & Status Siswa
+                </h1>
+                <p class="text-white/90 mt-1">Cek status pendaftaran dan riwayat pembayaran Anda</p>
+            </div>
+
+            <!-- Search Section -->
+            <div class="p-6 border-b">
+                <label class="block text-sm font-semibold text-darkblue mb-3">Masukkan Nama Siswa:</label>
+                <div class="flex gap-3 flex-col md:flex-row">
+                    <input type="text" id="searchInput" placeholder="Contoh: Ahmad Rizki, Siti Nur, dll..." 
+                        class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-sm">
+                    <button onclick="searchStudent()" 
+                        class="bg-primary hover:bg-darkblue text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 justify-center">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="p-6" id="resultContainer">
+                <div class="text-center py-8">
+                    <i class="fas fa-info-circle text-primary text-4xl mb-3"></i>
+                    <p class="text-gray-500 text-sm">Masukkan nama siswa untuk melihat riwayat pendaftaran dan status pembayaran.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="mt-8 bg-blue-50 border-l-4 border-primary rounded p-4">
+            <p class="text-sm text-gray-700"><i class="fas fa-lightbulb text-warning mr-2"></i>
+                <strong>Catatan:</strong> Jika Anda belum menemukan data, silakan hubungi admin di WhatsApp <strong>+62 812 3456 7890</strong> untuk verifikasi data.</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-darkblue text-white py-8 mt-16"
+        style="background: linear-gradient(135deg, #003459 0%, #0A66C2 100%);">
+        <div class="max-w-6xl mx-auto px-5 text-center">
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/20 pb-5 mb-5">
+                <div class="flex items-center gap-2 mx-auto md:mx-0"><i class="fas fa-water text-2xl"></i><span
+                        class="font-bold text-xl">SEKOLAH RENANG SIBAHAH</span></div>
+                <div class="text-sm italic">"Bisa, Yakin, Mampu & Berkarakter"</div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4 text-sm text-left text-white/80">
+                <div><i class="fas fa-map-marker-alt mr-2"></i> Kolam Renang HR Bukhari Muslim - Kota Medan</div>
+                <div><i class="fas fa-phone-alt mr-2"></i> +62 812 3456 7890 (Admin)</div>
+                <div><i class="fab fa-instagram mr-2"></i> @sibahah_renang</div>
+            </div>
+            <div class="text-xs text-white/60 mt-6">© 2026 Sibahah Swimming School | Program Latihan Terstruktur Putra Putri Terpisah.</div>
+        </div>
+    </footer>
+
+    <script>
+        let studentsData = [];
+
+        // Format Rupiah
+        const formatRupiah = (num) => 'Rp' + num.toLocaleString('id-ID');
+
+        // Fetch semua siswa
+        async function fetchStudents() {
+            try {
+                const response = await fetch('/api/students');
+                const result = await response.json();
+                
+                if (result.success) {
+                    studentsData = result.data;
+                    console.log('Students loaded:', studentsData);
+                } else {
+                    console.error('Error fetching students:', result.message);
+                }
+            } catch (error) {
+                console.error('Fetch students error:', error);
+            }
+        }
+
+        // Cari siswa
+        function searchStudent() {
+            const searchInput = document.getElementById('searchInput');
+            const searchValue = searchInput.value.trim().toLowerCase();
+            const resultContainer = document.getElementById('resultContainer');
+            
+            if (!searchValue) {
+                resultContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-info-circle text-primary text-4xl mb-3"></i>
+                        <p class="text-gray-500 text-sm">Masukkan nama siswa untuk melihat riwayat pendaftaran dan status pembayaran.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Cari siswa di data
+            const student = studentsData.find(s => s.nama.toLowerCase().includes(searchValue));
+            
+            if (!student) {
+                resultContainer.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                        <i class="fas fa-search text-red-500 text-3xl mb-3"></i>
+                        <p class="text-red-700 font-semibold">Siswa Tidak Ditemukan</p>
+                        <p class="text-red-600 text-sm mt-1">Coba cari dengan nama lengkap atau sebagian nama.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render hasil
+            let html = `
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-6">
+                    <!-- Info Siswa -->
+                    <div class="mb-6 pb-6 border-b border-blue-200">
+                        <h2 class="text-2xl font-bold text-darkblue flex items-center gap-2 mb-3">
+                            <i class="fas fa-user-circle text-primary text-3xl"></i>${student.nama}
+                        </h2>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">Orang Tua</p>
+                                <p class="font-semibold text-darkblue">${student.ortu}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">No. WA</p>
+                                <p class="font-semibold text-darkblue">${student.wa}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Email</p>
+                                <p class="font-semibold text-darkblue text-xs">${student.email || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Usia</p>
+                                <p class="font-semibold text-darkblue">${student.usia || '-'} tahun</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Riwayat Pendaftaran -->
+                    <div class="mb-6 pb-6 border-b border-blue-200">
+                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-accent"></i>Riwayat Pendaftaran
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Kelas</p>
+                                <p class="font-bold text-darkblue">${student.kelas}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Jadwal</p>
+                                <p class="font-bold text-darkblue">${student.jadwal}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Jenis Kelamin</p>
+                                <p class="font-bold text-darkblue">${student.gender === 'Putra' ? '👦 Putra' : '👧 Putri'}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Tanggal Daftar</p>
+                                <p class="font-bold text-darkblue">${student.tanggal_daftar || '-'}</p>
+                            </div>
+                        </div>
+                        ${student.catatan ? `<p class="text-sm text-gray-600 mt-3"><i class="fas fa-sticky-note text-warning mr-1"></i>Catatan: ${student.catatan}</p>` : ''}
+                    </div>
+            `;
+
+            // Status Pembayaran
+            if (student.status_pembayaran === 'BELUM_BAYAR') {
+                html += `
+                    <div class="mb-6 pb-6 border-b border-blue-200">
+                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
+                            <i class="fas fa-hourglass-end text-warning"></i>Status Pembayaran
+                        </h3>
+                        <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
+                            <p class="text-yellow-800 font-semibold mb-2">
+                                <i class="fas fa-clock mr-2"></i>Status: 
+                                <span class="status-badge status-pending">BELUM BAYAR</span>
+                            </p>
+                            <p class="text-yellow-700 text-sm">Anda masih perlu menyelesaikan pembayaran biaya pendaftaran.</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 mb-4 border border-blue-200">
+                            <p class="text-gray-600 text-xs mb-2">Biaya Pendaftaran yang Harus Dibayar:</p>
+                            <p class="text-3xl font-bold text-primary">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                        </div>
+                        <button onclick="goToPayment(${student.id}, '${student.nama}', ${student.uang_pendaftaran || 40000}, ${student.uang_spp || 100000})" class="block w-full bg-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-center transition">
+                            <i class="fas fa-credit-card mr-2"></i>Lanjut ke Pembayaran
+                        </button>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="mb-6 pb-6 border-b border-blue-200">
+                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
+                            <i class="fas fa-check-circle text-success"></i>Status Pembayaran
+                        </h3>
+                        <div class="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
+                            <p class="text-green-800 font-semibold mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>Status: 
+                                <span class="status-badge status-active">LUNAS</span>
+                            </p>
+                            <p class="text-green-700 text-sm">Pendaftaran Anda telah berhasil diverifikasi dan pembayaran telah diterima.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+                                <p class="text-gray-600 text-xs mb-2">Biaya Pendaftaran</p>
+                                <p class="font-bold text-primary text-lg">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+                                <p class="text-gray-600 text-xs mb-2">Tanggal Pembayaran</p>
+                                <p class="font-bold text-darkblue">${student.tanggal_pembayaran || '-'}</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-primary mr-1"></i>
+                            <strong>Metode Pembayaran:</strong> ${student.metode_pembayaran || 'Bank Transfer'}
+                        </p>
+                    </div>
+
+                    <!-- SPP Bulanan -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-300 rounded-lg p-4 mb-6">
+                        <h3 class="text-lg font-bold text-darkblue mb-3 flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-success"></i>SPP Bulanan
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 mb-3 border border-green-200">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600 font-semibold">Biaya SPP per Bulan:</span>
+                                <span class="text-2xl font-bold text-success">${formatRupiah(student.uang_spp || 100000)}</span>
+                            </div>
+                            <p class="text-sm text-gray-600"><i class="fas fa-check text-success mr-1"></i>Sudah termasuk uang kolam</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-check text-success mr-1"></i>1x latihan per minggu (4x per bulan)</p>
+                        </div>
+                    </div>
+
+                    <!-- SPP Tagihan Section -->
+                    <div class="mt-6 pt-6 border-t border-blue-200">
+                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-invoice text-accent"></i>Tagihan SPP
+                        </h3>
+                        <div id="sppInvoiceContainer"></div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            resultContainer.innerHTML = html;
+
+            // Load SPP invoices
+            loadSPPInvoices(student);
+        }
+
+        // Load SPP Invoices
+        function loadSPPInvoices(student) {
+            const container = document.getElementById('sppInvoiceContainer');
+            const registrationDate = new Date(student.tanggal_daftar + 'T00:00:00');
+            const currentDate = new Date();
+            
+            // SPP mulai bulan depan setelah pendaftaran
+            let sppStartMonth = new Date(registrationDate.getFullYear(), registrationDate.getMonth() + 1, 1);
+            
+            let invoices = [];
+            let currentMonth = new Date(sppStartMonth);
+            
+            // Generate invoices untuk 12 bulan ke depan
+            for (let i = 0; i < 12; i++) {
+                const invoiceMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                const dueDate = new Date(invoiceMonth.getFullYear(), invoiceMonth.getMonth() + 1, 5);
+                
+                let status = 'BELUM_BAYAR';
+                
+                // Cek apakah sudah lewat tanggal jatuh tempo
+                if (dueDate > currentDate) {
+                    status = 'BELUM_JATUH_TEMPO';
+                } else if (dueDate <= currentDate) {
+                    status = 'JATUH_TEMPO';
+                }
+                
+                invoices.push({
+                    month: invoiceMonth,
+                    dueDate: dueDate,
+                    amount: student.uang_spp || 100000,
+                    status: status
+                });
+                
+                currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+            }
+            
+            // Render invoices
+            let invoiceHTML = `
+                <div class="space-y-3">
+            `;
+            
+            invoices.forEach((inv, idx) => {
+                const monthName = inv.month.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                const isOverdue = inv.dueDate <= currentDate && inv.status === 'JATUH_TEMPO';
+                
+                let badgeClass = 'bg-green-50 border-green-300 text-green-700';
+                let badgeText = 'Belum Jatuh Tempo';
+                let badgeIcon = 'fa-clock';
+                
+                if (isOverdue) {
+                    badgeClass = 'bg-red-50 border-red-300 text-red-700';
+                    badgeText = 'Jatuh Tempo';
+                    badgeIcon = 'fa-exclamation-circle';
+                } else if (inv.dueDate > currentDate) {
+                    badgeClass = 'bg-blue-50 border-blue-300 text-blue-700';
+                    badgeText = 'Belum Jatuh Tempo';
+                    badgeIcon = 'fa-calendar';
+                }
+                
+                invoiceHTML += `
+                    <div class="border-2 ${badgeClass} rounded-lg p-4 flex justify-between items-center hover:shadow-md transition">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-darkblue mb-1">SPP ${monthName}</h4>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-calendar-alt mr-1"></i>Jatuh Tempo: ${inv.dueDate.toLocaleDateString('id-ID')}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-primary mb-1">${formatRupiah(inv.amount)}</p>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white border">
+                                <i class="fas ${badgeIcon} mr-1"></i>${badgeText}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            invoiceHTML += `
+                </div>
+                <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-warning rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Catatan:</strong> Pembayaran SPP harus dilunasi sebelum atau pada tanggal jatuh tempo. 
+                        Hubungi admin di WhatsApp <strong>+62 812 3456 7890</strong> untuk melakukan pembayaran SPP.
+                    </p>
+                </div>
+            `;
+            
+            container.innerHTML = invoiceHTML;
+        }
+
+        // Redirect ke halaman pembayaran dengan data otomatis
+        function goToPayment(studentId, studentName, biayaPendaftaran, biayaSpp) {
+            const params = new URLSearchParams({
+                id: studentId,
+                nama: studentName,
+                biaya_pendaftaran: biayaPendaftaran,
+                biaya_spp: biayaSpp
+            });
+            window.location.href = '/pembayaran?' + params.toString();
+        }
+
+        // Load data saat halaman dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStudents();
+            
+            // Enter key trigger search
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchStudent();
+            });
+        });
+    </script>
+
+</body>
+
+</html>
