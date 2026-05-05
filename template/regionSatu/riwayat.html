@@ -61,6 +61,32 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 30px -12px rgba(0, 0, 0, 0.15);
         }
+
+        .invoice-overdue {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+            animation: pulse-overdue 2s infinite;
+        }
+
+        @keyframes pulse-overdue {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .invoice-pending {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+        }
+
+        .invoice-normal {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border: 2px solid #22c55e;
+        }
     </style>
 </head>
 
@@ -142,6 +168,11 @@
 
     <script>
         let studentsData = [];
+
+        // ⚠️ TESTING: Ubah nilai ini untuk test tagihan jatuh tempo dengan bulan berbeda
+        // Format: 'YYYY-MM-DD' atau set null untuk gunakan tanggal sekarang
+        // Contoh untuk test: '2026-06-10' (akan menampilkan May sebagai jatuh tempo)
+        const TEST_CURRENT_DATE = null;
 
         // Format Rupiah
         const formatRupiah = (num) => 'Rp' + num.toLocaleString('id-ID');
@@ -334,79 +365,182 @@
         // Load SPP Invoices
         function loadSPPInvoices(student) {
             const container = document.getElementById('sppInvoiceContainer');
-            const registrationDate = new Date(student.tanggal_daftar + 'T00:00:00');
-            const currentDate = new Date();
-            
+            // Parse tanggal pendaftaran dengan validasi untuk menghindari "Invalid Date"
+            let registrationDate;
+            const currentDate = TEST_CURRENT_DATE ? new Date(TEST_CURRENT_DATE) : new Date();
+            let usedFallbackRegistrationDate = false;
+
+            if (student.tanggal_daftar && !isNaN(Date.parse(student.tanggal_daftar))) {
+                registrationDate = new Date(student.tanggal_daftar);
+            } else if (student.tanggal_daftar) {
+                // coba tambahkan T00:00:00 jika string tanggal tersedia tapi belum parseable
+                const tryDate = new Date(student.tanggal_daftar + 'T00:00:00');
+                if (!isNaN(tryDate.getTime())) {
+                    registrationDate = tryDate;
+                } else {
+                    console.warn('Invalid student.tanggal_daftar:', student.tanggal_daftar, 'for student', student.id);
+                    registrationDate = new Date();
+                    usedFallbackRegistrationDate = true;
+                }
+            } else {
+                // tidak ada tanggal pendaftaran, gunakan tanggal sekarang sebagai fallback
+                registrationDate = new Date();
+                usedFallbackRegistrationDate = true;
+            }
+
             // SPP mulai bulan depan setelah pendaftaran
             let sppStartMonth = new Date(registrationDate.getFullYear(), registrationDate.getMonth() + 1, 1);
             
             let invoices = [];
-            let currentMonth = new Date(sppStartMonth);
-            
-            // Generate invoices untuk 12 bulan ke depan
-            for (let i = 0; i < 12; i++) {
-                const invoiceMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+            // Pastikan kita menampilkan invoice untuk bulan berjalan (current month)
+            // atau mulai dari bulan berikutnya setelah pendaftaran, mana yang lebih besar.
+            const firstPossibleMonth = new Date(sppStartMonth.getFullYear(), sppStartMonth.getMonth(), 1);
+            const thisMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            // Tampilkan selalu bulan berjalan dan 1 bulan ke depan.
+            // Jika pendaftaran di masa depan dan ingin menunda tagihan, ubah policy nanti.
+            const startMonth = thisMonth;
+
+            // Kita hanya akan menampilkan bulan berjalan + 1 bulan ke depan (2 invoice)
+            let currentMonthIter = new Date(startMonth);
+            const invoiceCount = 2; // current month + next month
+
+            for (let i = 0; i < invoiceCount; i++) {
+                const invoiceMonth = new Date(currentMonthIter.getFullYear(), currentMonthIter.getMonth(), 1);
                 const dueDate = new Date(invoiceMonth.getFullYear(), invoiceMonth.getMonth() + 1, 5);
-                
+
                 let status = 'BELUM_BAYAR';
-                
-                // Cek apakah sudah lewat tanggal jatuh tempo
-                if (dueDate > currentDate) {
+                if (dueDate.getTime() > currentDate.getTime()) {
                     status = 'BELUM_JATUH_TEMPO';
-                } else if (dueDate <= currentDate) {
+                } else if (dueDate.getTime() <= currentDate.getTime()) {
                     status = 'JATUH_TEMPO';
                 }
-                
+
                 invoices.push({
                     month: invoiceMonth,
                     dueDate: dueDate,
                     amount: student.uang_spp || 100000,
                     status: status
                 });
-                
-                currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+
+                currentMonthIter = new Date(currentMonthIter.getFullYear(), currentMonthIter.getMonth() + 1, 1);
             }
             
             // Render invoices
             let invoiceHTML = `
                 <div class="space-y-3">
             `;
+
+            if (usedFallbackRegistrationDate) {
+                invoiceHTML += `
+                    <div class="p-3 mb-2 rounded bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Tanggal pendaftaran tidak valid atau kosong; menggunakan tanggal saat ini untuk menghitung SPP.
+                    </div>
+                `;
+            }
+
+            if (TEST_CURRENT_DATE) {
+                invoiceHTML += `
+                    <div class="p-3 mb-2 rounded bg-blue-50 border border-blue-300 text-sm text-blue-800">
+                        <i class="fas fa-flask-vial mr-2"></i><strong>MODE TESTING:</strong> Menggunakan tanggal: <code class="bg-blue-100 px-2 py-1 rounded">${currentDate.toLocaleDateString('id-ID')}</code>
+                    </div>
+                `;
+            }
+            
+            // Check if ada tagihan jatuh tempo (bandingkan waktu/timestamp)
+            const currentTimestamp = currentDate.getTime();
+            const hasOverdueInvoices = invoices.some(inv => inv.dueDate.getTime() <= currentTimestamp && inv.status === 'JATUH_TEMPO');
+            
             
             invoices.forEach((inv, idx) => {
                 const monthName = inv.month.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-                const isOverdue = inv.dueDate <= currentDate && inv.status === 'JATUH_TEMPO';
+                const isOverdue = inv.dueDate.getTime() <= currentTimestamp && inv.status === 'JATUH_TEMPO';
                 
-                let badgeClass = 'bg-green-50 border-green-300 text-green-700';
+                let invoiceClass = 'invoice-normal';
+                let badgeClass = 'bg-green-100 border-green-400 text-green-800';
                 let badgeText = 'Belum Jatuh Tempo';
                 let badgeIcon = 'fa-clock';
                 
                 if (isOverdue) {
-                    badgeClass = 'bg-red-50 border-red-300 text-red-700';
-                    badgeText = 'Jatuh Tempo';
+                    invoiceClass = 'invoice-overdue';
+                    badgeClass = 'bg-red-100 border-red-400 text-red-800';
+                    badgeText = 'JATUH TEMPO';
                     badgeIcon = 'fa-exclamation-circle';
-                } else if (inv.dueDate > currentDate) {
-                    badgeClass = 'bg-blue-50 border-blue-300 text-blue-700';
+                } else if (inv.dueDate.getTime() > currentTimestamp) {
+                    invoiceClass = 'invoice-pending';
+                    badgeClass = 'bg-blue-100 border-blue-400 text-blue-800';
                     badgeText = 'Belum Jatuh Tempo';
                     badgeIcon = 'fa-calendar';
                 }
-                
+                let payButtonHTML = '';
+                if (isOverdue) {
+                    // SPP JATUH TEMPO - Tombol prominent merah dengan animasi
+                    const escapedNama = student.nama.replace(/'/g, "\\'")
+                    payButtonHTML = `
+                        <div class="mt-4 text-right">
+                            <button onclick="goToPaymentSPP(${student.id}, '${escapedNama}', '${inv.month.getFullYear()}-${('0'+(inv.month.getMonth()+1)).slice(-2)}', ${inv.amount})" 
+                                class="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-6 py-3 rounded-lg text-sm font-bold shadow-lg transform transition hover:scale-105 active:scale-95 w-full md:w-auto">
+                                <i class="fas fa-money-bill-wave mr-2"></i>Bayar Sekarang - URGENT
+                            </button>
+                        </div>
+                    `;
+                } else if (hasOverdueInvoices) {
+                    // ADA TAGIHAN JATUH TEMPO LAIN - Tombol disabled
+                    payButtonHTML = `
+                        <div class="mt-4 text-right">
+                            <button disabled 
+                                class="bg-gray-400 text-gray-100 px-6 py-3 rounded-lg text-sm font-bold opacity-60 cursor-not-allowed w-full md:w-auto" 
+                                title="Bayar tagihan jatuh tempo lebih dulu">
+                                <i class="fas fa-lock mr-2"></i>Bayar Tagihan Jatuh Tempo Lebih Dulu
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // BELUM JATUH TEMPO, TIDAK ADA TAGIHAN JATUH TEMPO - Tombol optional
+                    const escapedNama = student.nama.replace(/'/g, "\\'")
+                    payButtonHTML = `
+                        <div class="mt-4 text-right">
+                            <button onclick="goToPaymentSPP(${student.id}, '${escapedNama}', '${inv.month.getFullYear()}-${('0'+(inv.month.getMonth()+1)).slice(-2)}', ${inv.amount})" 
+                                class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-bold shadow transition hover:shadow-md active:scale-95 w-full md:w-auto">
+                                <i class="fas fa-credit-card mr-2"></i>Bayar Sekarang
+                            </button>
+                        </div>
+                    `;
+                }
+
                 invoiceHTML += `
-                    <div class="border-2 ${badgeClass} rounded-lg p-4 flex justify-between items-center hover:shadow-md transition">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-darkblue mb-1">SPP ${monthName}</h4>
-                            <p class="text-sm text-gray-600">
-                                <i class="fas fa-calendar-alt mr-1"></i>Jatuh Tempo: ${inv.dueDate.toLocaleDateString('id-ID')}
-                            </p>
+                    <div class="${invoiceClass} rounded-lg p-5 hover:shadow-lg transition card-hover">
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-darkblue mb-2 text-lg">SPP ${monthName}</h4>
+                                <p class="text-sm text-gray-700"><i class="fas fa-calendar-alt mr-1"></i>Jatuh Tempo: <span class="font-semibold">${inv.dueDate.toLocaleDateString('id-ID')}</span></p>
+                                ${isOverdue ? '<p class="text-sm text-red-700 mt-1"><i class="fas fa-alert"></i> <strong>Tagihan sudah melewati tanggal jatuh tempo!</strong></p>' : ''}
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold ${isOverdue ? 'text-red-700' : 'text-primary'} mb-2">${formatRupiah(inv.amount)}</p>
+                                <span class="inline-block px-3 py-2 rounded-full text-xs font-bold ${badgeClass} border">
+                                    <i class="fas ${badgeIcon} mr-1"></i>${badgeText}
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xl font-bold text-primary mb-1">${formatRupiah(inv.amount)}</p>
-                            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white border">
-                                <i class="fas ${badgeIcon} mr-1"></i>${badgeText}
-                            </span>
-                        </div>
+                        ${payButtonHTML}
                     </div>
                 `;
             });
+            
+            // Jika ada tagihan jatuh tempo, tampilkan warning prominent
+            if (hasOverdueInvoices) {
+                invoiceHTML = `
+                    <div class="bg-red-50 border-2 border-red-400 rounded-lg p-4 mb-4 shadow-md">
+                        <p class="text-red-800 font-bold text-lg flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-2xl"></i>
+                            PERHATIAN: ADA TAGIHAN SPP JATUH TEMPO
+                        </p>
+                        <p class="text-red-700 text-sm mt-2">
+                            Silakan bayar tagihan yang sudah jatuh tempo terlebih dahulu sebelum membayar tagihan bulan berikutnya.
+                        </p>
+                    </div>
+                ` + invoiceHTML;
+            }
             
             invoiceHTML += `
                 </div>
@@ -431,6 +565,22 @@
                 biaya_spp: biayaSpp
             });
             window.location.href = '/pembayaran?' + params.toString();
+        }
+
+        // Redirect cepat untuk pembayaran SPP (bulan tertentu)
+        function goToPaymentSPP(studentId, studentName, monthIso, amount) {
+            console.log('[DEBUG] goToPaymentSPP called with:', {studentId, studentName, monthIso, amount});
+            const params = new URLSearchParams({
+                siswa: studentId,
+                nama: studentName,
+                type: 'SPP',
+                month: monthIso,
+                amount: amount
+            });
+            const url = '/pembayaran?' + params.toString();
+            console.log('[DEBUG] Redirecting to:', url);
+            // Halaman pembayaran menerima parameter SPP dan akan mem-prosesnya
+            window.location.href = url;
         }
 
         // Load data saat halaman dibuka

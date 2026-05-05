@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, redirect, flash, jsonify, session
+from flask import Flask, render_template, request, redirect, flash, jsonify, session, url_for
 import mysql.connector
 from mysql.connector import Error
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
+import bcrypt 
+from functools import wraps
+
+from datetime import timedelta
 
 def getDatabase():
     return mysql.connector.connect(
@@ -12,8 +16,26 @@ def getDatabase():
         database="sekolah_renang_sibahah"
     )
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect('/admin/login')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 app = Flask(__name__, template_folder='template')
 app.secret_key = "secretkey"
+app.config['SECRET_KEY'] = 'ganti-dengan-string-acak-yang-panjang-dan-unik'  # WAJIB!
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
+app.config['SESSION_COOKIE_SECURE'] = False   # Set True jika pakai HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+
+# Panggil saat startup
+# ensure_admin_table()
 
 @app.route('/')
 def landingPage():
@@ -23,37 +45,56 @@ def landingPage():
 def pendaftaran():
     return render_template('regionSatu/pendaftaran.html')
 
+
 @app.route('/dashboard/admin')
+@admin_required
 def admin_dashboard():
-    return render_template('regionSatu/admin/dashboard.html')
+    return render_template(
+        'regionSatu/admin/dashboard.html',
+        admin_username=session.get('admin_username'),
+        admin_role='Super Admin',  # Role bisa diambil dari database jika ada field role
+        admin_id=session.get('admin_id')
+    )
 
 @app.route('/admin/students')
+@admin_required
 def admin_students():
     return render_template('regionSatu/admin/students.html')
 
 @app.route('/admin/registrations')
+@admin_required
 def admin_registrations():
     return render_template('regionSatu/admin/registrations.html')
 
 @app.route('/admin/payments')
+@admin_required
 def admin_payments():
     return render_template('regionSatu/admin/payments.html')
 
 @app.route('/admin/schedule')
+@admin_required
 def admin_schedule():
     return render_template('regionSatu/admin/schedule.html')
 
 @app.route('/admin/settings')
+@admin_required
 def admin_settings():
     return render_template('regionSatu/admin/settings.html')
 
 @app.route('/admin/student-detail')
+@admin_required
 def admin_student_detail():
     return render_template('regionSatu/admin/student-detail.html')
 
 @app.route('/admin/payment-detail')
+@admin_required
 def admin_payment_detail():
     return render_template('regionSatu/admin/payment-detail.html')
+
+@app.route('/admin/spp-payments')
+@admin_required
+def admin_spp_payments():
+    return render_template('regionSatu/admin/spp-payments.html')
 
 @app.route('/pembayaran')
 def pembayaran():
@@ -68,6 +109,103 @@ def pembayaran():
 @app.route('/riwayat')
 def riwayat():
     return render_template('regionSatu/riwayat.html')
+
+ # pip install bcrypt
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    # Jika sudah login, redirect ke dashboard
+    if session.get('admin_logged_in'):
+        return redirect('/dashboard/admin')
+
+    error = None
+    success = request.args.get('success')
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if not username or not password:
+            error = 'Username dan password harus diisi'
+        else:
+            conn = getDatabase()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                'SELECT id, password FROM admin_users WHERE username = %s', 
+                (username,)
+            )
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            if not user or user['password'] != password:
+                error = 'Username atau password salah'
+            else:
+                session.clear()  # Bersihkan session lama
+                session.permanent = True
+                session['admin_logged_in'] = True
+                session['admin_username'] = username
+                session['admin_id'] = user['id']
+                return redirect('/dashboard/admin')
+
+    return render_template('regionSatu/admin/login.html', error=error, success=success)
+
+
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    error = None
+    username_value = ''
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        username_value = username
+
+        if not username or not password or not confirm_password:
+            error = 'Semua field harus diisi'
+        elif password != confirm_password:
+            error = 'Password dan konfirmasi password tidak cocok'
+        elif len(username) < 3:
+            error = 'Username minimal 3 karakter'
+        elif len(password) < 4:
+            error = 'Password minimal 4 karakter'
+        else:
+            conn = getDatabase()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute('SELECT id FROM admin_users WHERE username = %s', (username,))
+            if cursor.fetchone():
+                error = 'Username sudah digunakan'
+                cursor.close()
+                conn.close()
+            else:
+                cursor.execute(
+                    'INSERT INTO admin_users (username, password) VALUES (%s, %s)',
+                    (username, password)
+                )
+                conn.commit()
+                cursor.close()
+                conn.close()
+                return redirect(url_for('admin_login', success='Akun admin berhasil dibuat. Silakan login.'))
+
+    return render_template('regionSatu/admin/register.html', error=error, success=None, username=username_value)
+
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    session.pop('admin_username', None)
+    session.pop('admin_id', None)
+    return redirect('/admin/login')
+
+
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    session.pop('admin_logged_in', None)
+    session.pop('admin_username', None)
+    session.pop('admin_id', None)
+    return jsonify({'success': True}), 200
+
 
 # Route untuk menyimpan data pembayaran ke database
 @app.route('/payment', methods=['POST'])
@@ -116,9 +254,12 @@ def payment():
             nama_pengirim = %s,
             nomor_rekening_pengirim = %s,
             catatan_transfer = %s,
-            bukti_transfer = %s
+            bukti_transfer = %s,
+            total_biaya = %s
         WHERE id = %s
         """
+        
+        total_pembayaran = data.get('total_pembayaran', '0')
         
         values = (
             data.get('metode_pembayaran', 'Bank Transfer'),
@@ -126,6 +267,7 @@ def payment():
             data.get('nomorRekening', ''),
             data.get('catatan', ''),
             bukti_transfer,
+            total_pembayaran,
             registration_id
         )
         
@@ -162,6 +304,89 @@ def payment():
         traceback.print_exc()
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
+
+# Route untuk menyimpan pembayaran SPP (SPP-only)
+@app.route('/payment/spp', methods=['POST'])
+def payment_spp():
+    try:
+        print(f"[PAYMENT SPP] Received request")
+        print(f"[PAYMENT SPP] Form data: {request.form}")
+        print(f"[PAYMENT SPP] Files: {request.files}")
+
+        data = request.form
+
+        # Determine siswa/pendaftaran id: prefer explicit siswa_id, fallback to session registration_id
+        siswa_id = data.get('siswa_id') or data.get('siswa') or session.get('registration_id')
+        payment_month = data.get('payment_month') or data.get('month')
+        amount = data.get('total_pembayaran') or data.get('amount') or 0
+
+        # Validate file
+        file = request.files.get('fileUpload')
+        if not file or not file.filename:
+            return jsonify({'success': False, 'message': 'Bukti transfer tidak boleh kosong'}), 400
+
+        file_data = file.read()
+        import base64
+        bukti_transfer = base64.b64encode(file_data).decode('utf-8')
+
+        # Ensure table exists
+        conn = getDatabase()
+        cursor = conn.cursor()
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS spp_payments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            pendaftaran_id INT NULL,
+            siswa_id VARCHAR(100) NULL,
+            payment_month VARCHAR(20) NULL,
+            amount DECIMAL(12,2) NULL,
+            nama_pengirim VARCHAR(255) NULL,
+            nomor_rekening_pengirim VARCHAR(100) NULL,
+            catatan TEXT NULL,
+            bukti_transfer LONGTEXT NULL,
+            tanggal_pembayaran DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """
+        cursor.execute(create_table_sql)
+
+        insert_sql = """
+        INSERT INTO spp_payments (
+            pendaftaran_id, siswa_id, payment_month, amount,
+            nama_pengirim, nomor_rekening_pengirim, catatan, bukti_transfer
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+
+        values = (
+            session.get('registration_id') if session.get('registration_id') else None,
+            siswa_id,
+            payment_month,
+            float(amount) if amount else 0,
+            data.get('namaPengirim', ''),
+            data.get('nomorRekening', ''),
+            data.get('catatan', ''),
+            bukti_transfer
+        )
+
+        cursor.execute(insert_sql, values)
+        conn.commit()
+
+        inserted_id = cursor.lastrowid
+
+        cursor.close()
+        conn.close()
+
+        print(f"[PAYMENT SPP] Inserted spp_payments id={inserted_id}")
+
+        return jsonify({'success': True, 'message': 'Pembayaran SPP berhasil disimpan', 'spp_id': inserted_id}), 201
+
+    except Error as err:
+        print(f"[PAYMENT SPP] Database error: {err}")
+        return jsonify({'success': False, 'message': f'Database error: {str(err)}'}), 500
+    except Exception as e:
+        print(f"[PAYMENT SPP] Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
 # Route untuk menyimpan data pendaftaran ke database
 @app.route('/register', methods=['POST'])
 def register():
@@ -193,15 +418,15 @@ def register():
         """
         
         values = (
-            data['nama'],
-            data.get('usia') or None,
-            data['gender'],
-            data['ortu'],
-            data['wa'],
-            data.get('email') or None,
-            data['kelas'],
-            data['jadwal'],
-            data.get('catatan') or None
+            data['nama'],                  # wajib
+            data.get('usia') or None,      # opsional
+            data['gender'],                # wajib
+            data['ortu'],                  # wajib
+            data['wa'],                    # wajib
+            data.get('email') or None,     # opsional
+            data['kelas'],                 # wajib
+            data['jadwal'],                # wajib
+            data.get('catatan') or None    # opsional
         )
         
         cursor.execute(query, values)
@@ -245,13 +470,14 @@ def api_students():
         cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
         biaya = cursor.fetchone()
         uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
-        uang_spp = biaya['uang_spp'] if biaya else 100000
+        uang_spp = biaya['uang_spp'] if biaya else 160000
         
         # Query semua siswa
         query = """
         SELECT id, nama, usia, gender, ortu, wa, email, kelas, jadwal, 
                catatan, status_pembayaran, metode_pembayaran, 
-               tanggal_daftar, tanggal_pembayaran, keterangan
+               tanggal_daftar, tanggal_pembayaran, keterangan,
+               nama_pengirim, nomor_rekening_pengirim, catatan_transfer, bukti_transfer
         FROM pendaftaran
         ORDER BY tanggal_daftar DESC
         """
@@ -267,6 +493,12 @@ def api_students():
                 student['tanggal_pembayaran'] = student['tanggal_pembayaran'].strftime('%d-%m-%Y')
             student['uang_pendaftaran'] = uang_pendaftaran
             student['uang_spp'] = uang_spp
+            # Konversi bukti_transfer dari bytes ke string jika ada
+            if student.get('bukti_transfer'):
+                if isinstance(student['bukti_transfer'], bytes):
+                    student['bukti_transfer'] = student['bukti_transfer'].decode('utf-8')
+            else:
+                student['bukti_transfer'] = None
         
         cursor.close()
         conn.close()
@@ -300,10 +532,31 @@ def api_stats():
         cursor.execute("SELECT COUNT(*) as total FROM pendaftaran WHERE status_pembayaran = 'BELUM_BAYAR'")
         total_pending = cursor.fetchone()['total'] or 0
         
-        # Total pendapatan (asumsi pembayaran fixed 40000 per siswa)
+        # Total pendapatan (ambil dari database)
+        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
+        biaya = cursor.fetchone()
+        uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
+        uang_spp = biaya['uang_spp'] if biaya else 160000
+        total_per_siswa = uang_pendaftaran + uang_spp
+        
         cursor.execute("SELECT COUNT(*) as total FROM pendaftaran WHERE status_pembayaran = 'SUDAH_BAYAR'")
         total_bayar = cursor.fetchone()['total'] or 0
-        total_pendapatan = total_bayar * 40000
+        total_pendapatan = total_bayar * total_per_siswa
+        
+        # Total revenue SPP dari table spp_payments
+        total_spp_revenue = 0
+        try:
+            cursor.execute("SELECT COALESCE(SUM(amount), 0) as total FROM spp_payments")
+            spp_result = cursor.fetchone()
+            if spp_result:
+                total = spp_result.get('total')
+                if total is not None:
+                    total_spp_revenue = int(float(total)) if total else 0
+            print(f"[API STATS] SPP Revenue Query Success: {spp_result}, Total: {total_spp_revenue}")
+        except Exception as spp_err:
+            print(f"[API STATS] Error querying spp_payments: {spp_err}")
+            import traceback
+            traceback.print_exc()
         
         # Breakdown per kelas
         cursor.execute("SELECT kelas, COUNT(*) as jumlah FROM pendaftaran GROUP BY kelas")
@@ -318,6 +571,7 @@ def api_stats():
             'total_pendaftaran': total_pending,
             'total_pendapatan': total_pendapatan,
             'total_menunggu_bayar': total_pending,
+            'total_spp_revenue': total_spp_revenue,
             'breakdown_kelas': kelas_breakdown
         }), 200
         
@@ -377,12 +631,19 @@ def api_payments():
         conn = getDatabase()
         cursor = conn.cursor(dictionary=True)
         
+        # Ambil biaya dari database
+        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
+        biaya = cursor.fetchone()
+        uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
+        uang_spp = biaya['uang_spp'] if biaya else 160000
+        total_nominal = uang_pendaftaran + uang_spp
+        
         # Query pembayaran yang sudah diverifikasi - include semua field
         query = """
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer, 40000 as nominal
+               bukti_transfer
         FROM pendaftaran
         WHERE status_pembayaran = 'SUDAH_BAYAR'
         ORDER BY tanggal_pembayaran DESC
@@ -403,6 +664,10 @@ def api_payments():
                     payment['bukti_transfer'] = payment['bukti_transfer'].decode('utf-8')
             else:
                 payment['bukti_transfer'] = None
+            # Tambahkan nominal pembayaran
+            payment['uang_pendaftaran'] = uang_pendaftaran
+            payment['uang_spp'] = uang_spp
+            payment['nominal'] = total_nominal
         
         cursor.close()
         conn.close()
@@ -428,12 +693,19 @@ def api_payments_pending():
         conn = getDatabase()
         cursor = conn.cursor(dictionary=True)
         
+        # Ambil biaya dari database
+        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
+        biaya = cursor.fetchone()
+        uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
+        uang_spp = biaya['uang_spp'] if biaya else 160000
+        total_nominal = uang_pendaftaran + uang_spp
+        
         # Query pembayaran yang belum diverifikasi/pending
         query = """
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer, 40000 as nominal
+               bukti_transfer
         FROM pendaftaran
         WHERE status_pembayaran != 'SUDAH_BAYAR'
         ORDER BY tanggal_daftar DESC
@@ -453,6 +725,10 @@ def api_payments_pending():
                     payment['bukti_transfer'] = payment['bukti_transfer'].decode('utf-8')
             else:
                 payment['bukti_transfer'] = None
+            # Tambahkan nominal pembayaran
+            payment['uang_pendaftaran'] = uang_pendaftaran
+            payment['uang_spp'] = uang_spp
+            payment['nominal'] = total_nominal
         
         cursor.close()
         conn.close()
@@ -478,12 +754,19 @@ def api_payments_registration():
         conn = getDatabase()
         cursor = conn.cursor(dictionary=True)
         
+        # Ambil biaya dari database
+        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
+        biaya = cursor.fetchone()
+        uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
+        uang_spp = biaya['uang_spp'] if biaya else 160000
+        total_nominal = uang_pendaftaran + uang_spp
+        
         # Query siswa yang status pembayaran SUDAH_BAYAR
         query = """
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer, 40000 as nominal
+               bukti_transfer
         FROM pendaftaran
         WHERE status_pembayaran = 'SUDAH_BAYAR'
         ORDER BY tanggal_pembayaran DESC
@@ -503,6 +786,10 @@ def api_payments_registration():
                     payment['bukti_transfer'] = payment['bukti_transfer'].decode('utf-8')
             else:
                 payment['bukti_transfer'] = None
+            # Tambahkan nominal pembayaran
+            payment['uang_pendaftaran'] = uang_pendaftaran
+            payment['uang_spp'] = uang_spp
+            payment['nominal'] = total_nominal
         
         cursor.close()
         conn.close()
@@ -572,6 +859,46 @@ def api_payments_spp():
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
 
+# API: GET daftar spp_payments (yang tersimpan melalui /payment/spp)
+@app.route('/api/spp_payments', methods=['GET'])
+def api_spp_payments():
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT id, pendaftaran_id, siswa_id, payment_month, amount,
+               nama_pengirim, nomor_rekening_pengirim, catatan, bukti_transfer, tanggal_pembayaran
+        FROM spp_payments
+        ORDER BY tanggal_pembayaran DESC
+        LIMIT 200
+        """
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        # Format tanggal
+        for r in rows:
+            if r.get('tanggal_pembayaran'):
+                try:
+                    r['tanggal_pembayaran'] = r['tanggal_pembayaran'].strftime('%d-%m-%Y %H:%M')
+                except Exception:
+                    pass
+            # bukti_transfer dibiarkan sebagai base64 string (atau NULL)
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'data': rows, 'total': len(rows)}), 200
+
+    except Error as err:
+        print(f"[API SPP_PAYMENTS] Database error: {err}")
+        return jsonify({'success': False, 'message': f'Database error: {str(err)}'}), 500
+    except Exception as e:
+        print(f"[API SPP_PAYMENTS] Error: {e}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
 # ========== API ENDPOINTS UNTUK MANAJEMEN BIAYA ==========
 
 # API: GET biaya sekolah (uang pendaftaran & SPP)
@@ -596,7 +923,7 @@ def api_biaya():
             return jsonify({
                 'success': True,
                 'uang_pendaftaran': 40000,
-                'uang_spp': 100000
+                'uang_spp': 160000
             }), 200
         
         return jsonify({
@@ -611,7 +938,7 @@ def api_biaya():
         return jsonify({
             'success': True,
             'uang_pendaftaran': 40000,
-            'uang_spp': 100000
+            'uang_spp': 160000
         }), 200
 
 # API: UPDATE biaya sekolah
@@ -655,4 +982,4 @@ def api_biaya_update():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

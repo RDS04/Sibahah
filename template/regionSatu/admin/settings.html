@@ -115,13 +115,19 @@
                     <i class="fas fa-users w-5"></i>
                     <span>Data Siswa</span>
                 </a>
-                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                <!-- <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
-                </a>
+                </a> -->
                 <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
+                </a>
+                   <a href="/admin/spp-payments"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                    data-page="spp-payments">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Pembayaran SPP</span>
                 </a>
                 <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
                     <i class="fas fa-calendar-alt w-5"></i>
@@ -135,7 +141,7 @@
                     <i class="fas fa-cog w-5"></i>
                     <span>Pengaturan</span>
                 </a>
-                <a href="javascript:void(0)" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4">
+                <a href="#" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4" style="cursor: pointer;">
                     <i class="fas fa-sign-out-alt w-5"></i>
                     <span>Logout</span>
                 </a>
@@ -390,11 +396,40 @@
             }
         }
 
+        // Logout function
+        async function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        // Redirect ke halaman login
+                        window.location.href = '/admin/login';
+                    } else {
+                        console.error('Logout failed');
+                        window.location.href = '/admin/login';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Fallback: redirect to login page anyway
+                    window.location.href = '/admin/login';
+                }
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadBiaya();
             setActiveNav('settings');
             document.getElementById('biayaForm').addEventListener('submit', saveBiaya);
+            
+            // Logout button handler
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
             
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); });

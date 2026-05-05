@@ -436,7 +436,7 @@
                 </div>
                 <div class="account-item">
                     <span class="account-label">Jumlah Transfer</span>
-                    <span class="account-value" id="jumlahTransfer" style="color: #10b981;">Rp140.000</span>
+                    <span class="account-value" id="jumlahTransfer" style="color: #10b981;">Rp200.000</span>
                 </div>
             </div>
         </div>
@@ -458,17 +458,17 @@
             <div class="account-row">
                 <div class="account-item">
                     <span class="account-label">Biaya Pendaftaran</span>
-                    <span class="account-value" id="displayBiayaPendaftaran" style="color: #065f46;">Rp40.000</span>
+                    <span class="account-value" id="displayBiayaPendaftaran" style="color: #065f46;"></span>
                 </div>
                 <div class="account-item">
                     <span class="account-label">SPP (1 Bulan)</span>
-                    <span class="account-value" id="displayBiayaSpp" style="color: #065f46;">Rp100.000</span>
+                    <span class="account-value" id="displayBiayaSpp" style="color: #065f46;">Rp160.000</span>
                 </div>
             </div>
             <div style="border-top: 2px solid #a7f3d0; margin: 12px 0; padding-top: 12px;">
                 <div class="flex justify-between items-center">
                     <span class="account-label">Total Pembayaran</span>
-                    <span class="account-value" id="displayTotalBiaya" style="color: #059669; font-size: 22px;">Rp140.000</span>
+                    <span class="account-value" id="displayTotalBiaya" style="color: #059669; font-size: 22px;"></span>
                 </div>
             </div>
         </div>
@@ -549,7 +549,7 @@
 
             <div class="result-item">
                 <div class="result-label">Jumlah Transfer</div>
-                <div class="result-value" style="color: #10b981;">Rp 40.000</div>
+                <div class="result-value" style="color: #10b981;" id="resultJumlah"></div>
             </div>
 
             <div class="result-item">
@@ -568,7 +568,7 @@
         // ===== LOAD BIAYA DARI API =====
         let biayaData = {
             uang_pendaftaran: 40000,
-            uang_spp: 100000
+            uang_spp: 160000
         };
 
         let studentData = {
@@ -576,30 +576,41 @@
             nama: null
         };
 
-        // Get URL parameters
+        // Get URL parameters (supports SPP-specific params)
         function getUrlParams() {
             const params = new URLSearchParams(window.location.search);
             return {
                 id: params.get('id'),
                 nama: params.get('nama'),
                 biaya_pendaftaran: parseInt(params.get('biaya_pendaftaran')) || null,
-                biaya_spp: parseInt(params.get('biaya_spp')) || null
+                biaya_spp: parseInt(params.get('biaya_spp')) || null,
+                // SPP specific
+                type: params.get('type'),
+                siswa: params.get('siswa'),
+                month: params.get('month'),
+                amount: parseInt(params.get('amount')) || null
             };
         }
 
         async function loadBiayaFromAPI() {
             try {
+                console.log('[DEBUG] Loading biaya from API...');
                 const response = await fetch('/api/biaya');
                 const result = await response.json();
                 
+                console.log('[DEBUG] API response:', result);
+                
                 if (result.success) {
                     biayaData.uang_pendaftaran = result.uang_pendaftaran || 40000;
-                    biayaData.uang_spp = result.uang_spp || 100000;
+                    biayaData.uang_spp = result.uang_spp || 160000;
+                    console.log('[DEBUG] Updated biayaData:', biayaData);
                     updateBiayaDisplay();
                 }
             } catch (error) {
-                console.error('Error loading biaya:', error);
+                console.error('[DEBUG] Error loading biaya:', error);
                 // Use default values
+                biayaData.uang_pendaftaran = 40000;
+                biayaData.uang_spp = 160000;
                 updateBiayaDisplay();
             }
         }
@@ -607,43 +618,113 @@
         // Load data dari URL parameters jika ada
         function loadFromUrlParams() {
             const params = getUrlParams();
-            
-            if (params.nama) {
+            console.log('[DEBUG] URL params:', params);
+            console.log('[DEBUG] params.nama value:', params.nama);
+            // reset SPP flag
+            window.isSPPPayment = false;
+            window.sppMonth = null;
+            window.sppStudentId = null;
+
+            // Selalu update nama jika ada di URL, terlepas dari kondisi lainnya
+            if (params.nama && params.nama.trim() !== '') {
                 studentData.id = params.id;
                 studentData.nama = params.nama;
+                console.log('[DEBUG] Setting displayNama to:', params.nama);
                 document.getElementById('displayNama').textContent = params.nama;
                 document.getElementById('namaPengirim').value = params.nama;
+            } else {
+                console.log('[DEBUG] No nama parameter found or empty');
             }
             
-            if (params.biaya_pendaftaran) {
+            if (params.biaya_pendaftaran && !isNaN(params.biaya_pendaftaran) && params.biaya_pendaftaran > 0) {
                 biayaData.uang_pendaftaran = params.biaya_pendaftaran;
             }
             
-            if (params.biaya_spp) {
+            if (params.biaya_spp && !isNaN(params.biaya_spp) && params.biaya_spp > 0) {
                 biayaData.uang_spp = params.biaya_spp;
             }
+
+            // Jika dipanggil dari tagihan SPP (type=SPP), tampilkan form khusus SPP
+            if (params.type && params.type.toUpperCase() === 'SPP') {
+                window.isSPPPayment = true;
+                window.sppMonth = params.month || null;
+                window.sppStudentId = params.siswa || params.id || null;
+
+                // gunakan amount jika diberikan, fallback ke biayaData.uang_spp
+                const sppAmount = (params.amount && !isNaN(params.amount) && params.amount > 0) ? params.amount : biayaData.uang_spp;
+
+                // Set biaya pendaftaran ke 0 dan spp ke sppAmount
+                biayaData.uang_pendaftaran = 0;
+                biayaData.uang_spp = sppAmount;
+                
+                // Jangan reset displayNama - gunakan yang sudah ada dari URL params
+                // Hanya set ke '-' jika belum ada sama sekali
+                if (!studentData.nama || studentData.nama.trim() === '') {
+                    console.log('[DEBUG] No student name set, using placeholder');
+                    document.getElementById('displayNama').textContent = '-';
+                }
+                
+                // Update subtitle header untuk pembayaran SPP
+                const monthText = window.sppMonth ? window.sppMonth : 'bulan yang dipilih';
+                document.querySelector('.subtitle').textContent = `Pembayaran SPP untuk ${monthText}`;
+
+                // Tampilkan alert informatif (tidak otomatis membayar)
+                showAlert(`Anda akan membayar SPP untuk ${monthText}. Lengkapi data pengirim dan unggah bukti lalu tekan Konfirmasi.`, 'info');
+            }
             
+            console.log('[DEBUG] After loadFromUrlParams, biayaData:', biayaData);
             updateBiayaDisplay();
         }
 
         function formatRupiah(num) {
-            return 'Rp' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+            // Ensure num is a valid number
+            const numValue = Number(num) || 0;
+            if (numValue === 0) {
+                console.warn('[DEBUG] formatRupiah received 0 value!');
+            }
+            return 'Rp' + numValue.toLocaleString('id-ID', { minimumFractionDigits: 0 });
         }
 
         function updateBiayaDisplay() {
-            document.getElementById('displayBiayaPendaftaran').textContent = formatRupiah(biayaData.uang_pendaftaran);
-            document.getElementById('displayBiayaSpp').textContent = formatRupiah(biayaData.uang_spp);
+            console.log('[DEBUG] updateBiayaDisplay called with:', biayaData);
             
-            const total = biayaData.uang_pendaftaran + biayaData.uang_spp;
+            // Ensure values are numbers
+            // Jika payment SPP saja, total = spp, pendaftaran dianggap 0
+            const pendaftaran = Number(biayaData.uang_pendaftaran) || 0;
+            const spp = Number(biayaData.uang_spp) || 160000;
+            const total = (window.isSPPPayment) ? spp : (pendaftaran + spp);
+            
+            console.log('[DEBUG] Calculated total:', total);
+            
+            document.getElementById('displayBiayaPendaftaran').textContent = formatRupiah(pendaftaran);
+            document.getElementById('displayBiayaSpp').textContent = formatRupiah(spp);
             document.getElementById('displayTotalBiaya').textContent = formatRupiah(total);
             document.getElementById('jumlahTransfer').textContent = formatRupiah(total);
+            
+            // Sembunyikan "Biaya Pendaftaran" jika pembayaran SPP saja
+            const biayaPendaftaranSection = document.getElementById('displayBiayaPendaftaran').parentElement.parentElement;
+            if (window.isSPPPayment) {
+                biayaPendaftaranSection.style.display = 'none';
+                // Ubah layout column menjadi single
+                biayaPendaftaranSection.parentElement.style.gridTemplateColumns = '1fr';
+            } else {
+                biayaPendaftaranSection.style.display = 'block';
+                biayaPendaftaranSection.parentElement.style.gridTemplateColumns = '1fr 1fr';
+            }
         }
 
         // ===== LOAD REGISTRATION DATA =====
-        // Load nama siswa dari Flask session
-        const registrationData = {{ registration_data | tojson | safe }};
+        // Load nama siswa dari Flask session (jika diproses oleh Flask template engine)
+        let registrationData = null;
+        try {
+            registrationData = {{ registration_data | tojson | safe }};
+        } catch (e) {
+            console.log('[DEBUG] Template variables not processed (static file served)');
+            registrationData = null;
+        }
 
-        if (registrationData && registrationData.nama) {
+        // Fallback: gunakan registration data dari session jika ada, tapi prioritas URL params
+        if (registrationData && registrationData.nama && !studentData.nama) {
             document.getElementById('displayNama').textContent = registrationData.nama;
         }
 
@@ -718,16 +799,42 @@
 
             // Create FormData
             const formData = new FormData();
+            const pendaftaran = Number(biayaData.uang_pendaftaran) || 40000;
+            const spp = Number(biayaData.uang_spp) || 160000;
+            // Untuk SPP-only payment, total hanya SPP tanpa biaya pendaftaran
+            const total = (window.isSPPPayment) ? spp : (pendaftaran + spp);
+            
+            console.log('=== DEBUG: BIAYA DATA ===');
+            console.log('isSPPPayment:', window.isSPPPayment);
+            console.log('uang_pendaftaran:', pendaftaran);
+            console.log('uang_spp:', spp);
+            console.log('total:', total);
+            console.log('========================');
+            
             formData.append('namaPengirim', namaPengirim);
             formData.append('nomorRekening', nomorRekening);
             formData.append('catatan', catatan);
             formData.append('metode_pembayaran', 'Bank Transfer');
+            formData.append('total_pembayaran', total);
+            // Jika ini SPP-only, sertakan meta agar backend mengenali konteks
+            if (window.isSPPPayment) {
+                formData.append('payment_type', 'SPP');
+                if (window.sppMonth) formData.append('payment_month', window.sppMonth);
+                if (window.sppStudentId) formData.append('siswa_id', window.sppStudentId);
+            }
             formData.append('fileUpload', file);
 
-            console.log('Sending to /payment endpoint...');
+            console.log('=== PAYMENT ROUTE DEBUG ===');
+            console.log('isSPPPayment:', window.isSPPPayment);
+            console.log('sppStudentId:', window.sppStudentId);
+            console.log('sppMonth:', window.sppMonth);
+            
+            // Tentukan endpoint berdasarkan tipe pembayaran
+            const endpoint = window.isSPPPayment ? '/payment/spp' : '/payment';
+            console.log('Sending to endpoint:', endpoint, 'with total_pembayaran:', total);
 
             // Send to backend
-            fetch('/payment', {
+            fetch(endpoint, {
                 method: 'POST',
                 body: formData
             })
@@ -741,6 +848,7 @@
                     // Show success
                     document.getElementById('resultPengirim').textContent = namaPengirim;
                     document.getElementById('resultFile').textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                    document.getElementById('resultJumlah').textContent = formatRupiah(total);
 
                     resultDiv.classList.add('show');
                     
@@ -788,13 +896,18 @@
         }
 
         // Load data from URL or localStorage
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            console.log('[DEBUG] Page load event triggered');
+            
             // Load data dari URL parameters terlebih dahulu
             loadFromUrlParams();
             
             // Jika tidak ada URL params, load dari API
             if (!studentData.nama) {
-                loadBiayaFromAPI();
+                console.log('[DEBUG] No student data from URL, loading from API...');
+                await loadBiayaFromAPI();
+            } else {
+                console.log('[DEBUG] Student data from URL, biayaData:', biayaData);
             }
             
             const savedData = localStorage.getItem('sibahah_registration');
@@ -807,6 +920,8 @@
                     document.getElementById('namaPengirim').value = data.nama;
                 }
             }
+            
+            console.log('[DEBUG] Final biayaData:', biayaData);
         });
     </script>
 </body>

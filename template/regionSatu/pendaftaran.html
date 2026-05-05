@@ -309,12 +309,12 @@
                     </div>
                     <div class="flex justify-between items-center text-sm mb-2">
                         <span class="text-gray-600">SPP Bulanan (1 bulan):</span>
-                        <span class="font-semibold text-darkblue" id="displayUangSpp">Rp100.000</span>
+                        <span class="font-semibold text-darkblue" id="displayUangSpp">Rp160.000</span>
                     </div>
                     <div class="border-t border-blue-200 my-2"></div>
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-darkblue">Total Pembayaran:</span>
-                        <span class="font-bold text-primary text-lg" id="totalBiaya">Rp140.000</span>
+                        <span class="font-bold text-primary text-lg" id="totalBiaya">Rp200.000</span>
                     </div>
                     <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> Pembayaran dilakukan di halaman berikutnya.</p>
                 </div>
@@ -363,12 +363,12 @@
                     </div>
                     <div class="flex justify-between items-center text-sm mb-3">
                         <span class="text-gray-700">SPP Bulanan (1 bulan):</span>
-                        <span class="font-bold text-darkblue" id="modalUangSpp">Rp100.000</span>
+                        <span class="font-bold text-darkblue" id="modalUangSpp">Rp160.000</span>
                     </div>
                     <div class="border-t border-blue-300 my-2"></div>
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-darkblue">Total Pembayaran:</span>
-                        <span class="font-bold text-primary text-lg" id="modalTotalBiaya">Rp140.000</span>
+                        <span class="font-bold text-primary text-lg" id="modalTotalBiaya">Rp200.000</span>
                     </div>
                 </div>
                 
@@ -395,40 +395,51 @@
         // ===== LOAD BIAYA DARI API =====
         let biayaData = {
             uang_pendaftaran: 40000,
-            uang_spp: 100000
+            uang_spp: 160000
         };
 
         async function loadBiayaFromAPI() {
             try {
+                console.log('[PENDAFTARAN] Loading biaya from API...');
                 const response = await fetch('/api/biaya');
                 const result = await response.json();
                 
+                console.log('[PENDAFTARAN] API Response:', result);
+                
                 if (result.success) {
                     biayaData.uang_pendaftaran = result.uang_pendaftaran || 40000;
-                    biayaData.uang_spp = result.uang_spp || 100000;
+                    biayaData.uang_spp = result.uang_spp || 160000;
+                    console.log('[PENDAFTARAN] Updated biayaData:', biayaData);
                     updateBiayaDisplay();
                 }
             } catch (error) {
-                console.error('Error loading biaya:', error);
+                console.error('[PENDAFTARAN] Error loading biaya:', error);
                 // Use default values
+                biayaData.uang_pendaftaran = 40000;
+                biayaData.uang_spp = 160000;
                 updateBiayaDisplay();
             }
         }
 
         function updateBiayaDisplay() {
             const formatRupiah = (num) => {
-                return 'Rp' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+                const numValue = Number(num) || 0;
+                return 'Rp' + numValue.toLocaleString('id-ID', { minimumFractionDigits: 0 });
             };
 
-            document.getElementById('displayUangPendaftaran').textContent = formatRupiah(biayaData.uang_pendaftaran);
-            document.getElementById('displayUangSpp').textContent = formatRupiah(biayaData.uang_spp);
+            const pendaftaran = Number(biayaData.uang_pendaftaran) || 40000;
+            const spp = Number(biayaData.uang_spp) || 160000;
+            const total = pendaftaran + spp;
             
-            const total = biayaData.uang_pendaftaran + biayaData.uang_spp;
+            console.log('[PENDAFTARAN] Updating display - Pendaftaran:', pendaftaran, 'SPP:', spp, 'Total:', total);
+
+            document.getElementById('displayUangPendaftaran').textContent = formatRupiah(pendaftaran);
+            document.getElementById('displayUangSpp').textContent = formatRupiah(spp);
             document.getElementById('totalBiaya').textContent = formatRupiah(total);
             
             // Update modal juga
-            document.getElementById('modalUangPendaftaran').textContent = formatRupiah(biayaData.uang_pendaftaran);
-            document.getElementById('modalUangSpp').textContent = formatRupiah(biayaData.uang_spp);
+            document.getElementById('modalUangPendaftaran').textContent = formatRupiah(pendaftaran);
+            document.getElementById('modalUangSpp').textContent = formatRupiah(spp);
             document.getElementById('modalTotalBiaya').textContent = formatRupiah(total);
         }
 

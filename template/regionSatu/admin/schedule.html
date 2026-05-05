@@ -104,13 +104,19 @@
                     <i class="fas fa-users w-5"></i>
                     <span>Data Siswa</span>
                 </a>
-                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                <!-- <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
-                </a>
+                </a> -->
                 <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
+                </a>
+                   <a href="/admin/spp-payments"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                    data-page="spp-payments">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Pembayaran SPP</span>
                 </a>
                 <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="schedule">
                     <i class="fas fa-calendar-alt w-5"></i>
@@ -240,15 +246,15 @@
 
     <script>
         let schedulesData = [
-            { id: 1, hari: "Selasa", jam: "17:00 - 18:00", kelas: "Pemula", jenis: "Putra", peserta: 8, instruktur: "Pak Budi" },
-            { id: 2, hari: "Jumat", jam: "15:00 - 16:00", kelas: "Pemula", jenis: "Putra", peserta: 7, instruktur: "Pak Rudi" },
-            { id: 3, hari: "Sabtu", jam: "09:00 - 10:00", kelas: "Pemula", jenis: "Putra", peserta: 6, instruktur: "Pak Budi" },
-            { id: 4, hari: "Sabtu", jam: "15:00 - 16:00", kelas: "Lanjutan", jenis: "Putra", peserta: 5, instruktur: "Pak Rudi" },
+            { id: 1, hari: "Selasa", jam: "17:00 - 18:00", kelas: "Pemula", jenis: "Putra", peserta: 8, instruktur:"Coach Fikri" },
+            { id: 2, hari: "Jumat", jam: "15:00 - 16:00", kelas: "Pemula", jenis: "Putra", peserta: 7, instruktur: "Coach Fikri" },
+            { id: 3, hari: "Sabtu", jam: "09:00 - 10:00", kelas: "Pemula", jenis: "Putra", peserta: 6, instruktur: "Coach Fikri" },
+            { id: 4, hari: "Sabtu", jam: "15:00 - 16:00", kelas: "Lanjutan", jenis: "Putra", peserta: 5, instruktur: "Coach Fikri" },
             
-            { id: 5, hari: "Selasa", jam: "16:00 - 17:00", kelas: "Pemula", jenis: "Putri", peserta: 9, instruktur: "Ibu Siti" },
-            { id: 6, hari: "Jumat", jam: "14:00 - 15:00", kelas: "Pemula", jenis: "Putri", peserta: 10, instruktur: "Ibu Dewi" },
-            { id: 7, hari: "Sabtu", jam: "08:00 - 09:00", kelas: "Pemula", jenis: "Putri", peserta: 8, instruktur: "Ibu Siti" },
-            { id: 8, hari: "Sabtu", jam: "14:00 - 15:00", kelas: "Lanjutan", jenis: "Putri", peserta: 6, instruktur: "Ibu Dewi" },
+            { id: 5, hari: "Selasa", jam: "16:00 - 17:00", kelas: "Pemula", jenis: "Putri", peserta: 9, instruktur: "Coach Fikri" },
+            { id: 6, hari: "Jumat", jam: "14:00 - 15:00", kelas: "Pemula", jenis: "Putri", peserta: 10, instruktur: "Coach Fikri" },
+            { id: 7, hari: "Sabtu", jam: "08:00 - 09:00", kelas: "Pemula", jenis: "Putri", peserta: 8, instruktur: "Coach Fikri" },
+            { id: 8, hari: "Sabtu", jam: "14:00 - 15:00", kelas: "Lanjutan", jenis: "Putri", peserta: 6, instruktur: "Coach Fikri" },
         ];
 
         function renderScheduleCards() {

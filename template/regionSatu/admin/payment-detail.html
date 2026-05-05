@@ -184,13 +184,19 @@
                     <i class="fas fa-users w-5"></i>
                     <span>Data Siswa</span>
                 </a>
-                <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                <!-- <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
-                </a>
+                </a> -->
                 <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
+                </a>
+                   <a href="/admin/spp-payments"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                    data-page="spp-payments">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Pembayaran SPP</span>
                 </a>
                 <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
                     <i class="fas fa-calendar-alt w-5"></i>
@@ -289,7 +295,7 @@
                     <div class="detail-row">
                         <div>
                             <div class="detail-label">Jumlah Pembayaran</div>
-                            <div style="font-size: 24px; color: #10B981; font-weight: 700; margin-top: 8px;">Rp 40.000</div>
+                            <div style="font-size: 24px; color: #10B981; font-weight: 700; margin-top: 8px;" id="paymentJumlah">Rp0</div>
                         </div>
                         <div>
                             <div class="detail-label">Status</div>
@@ -402,6 +408,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const paymentId = urlParams.get('id');
 
+        function formatRupiah(num) {
+            const numValue = Number(num) || 0;
+            return 'Rp' + numValue.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+        }
+
         async function loadPaymentDetail() {
             try {
                 if (!paymentId) {
@@ -450,6 +461,10 @@
             document.getElementById('paymentStatus').appendChild(statusBadge);
 
             // Detail Pembayaran
+            // Hitung jumlah pembayaran dari uang_pendaftaran + uang_spp atau ambil dari nominal
+            const jumlahPembayaran = payment.nominal || (payment.uang_pendaftaran || 0) + (payment.uang_spp || 0) || 0;
+            document.getElementById('paymentJumlah').textContent = formatRupiah(jumlahPembayaran);
+            
             document.getElementById('paymentTglBayar').textContent = payment.tanggal_pembayaran || '-';
             document.getElementById('paymentMetode').textContent = payment.metode_pembayaran || 'Bank Transfer';
             document.getElementById('paymentKeterangan').textContent = `Pendaftaran ${payment.nama} ke kelas ${payment.kelas}`;

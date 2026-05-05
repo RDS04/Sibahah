@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran SPP - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A66C2',
+                        secondary: '#00A8E8',
+                        accent: '#F4A261',
+                        darkblue: '#003459',
+                        air: '#E6F7FF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar transition */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0) !important;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .settings-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-card i {
+            color: #0A66C2;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+      <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
+        <div class="p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
+                    <i class="fas fa-water text-white text-md"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                    <p class="text-white/50 text-xs">Sekolah Renang</p>
+                </div>
+            </div>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="py-6 px-4">
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="students">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </a>
+                <!-- <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Pendaftaran Baru</span>
+                </a> -->
+                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Pembayaran</span>
+                </a>
+                   <a href="/admin/spp-payments"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                    data-page="spp-payments">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Pembayaran SPP</span>
+                </a>
+                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Jadwal Latihan</span>
+                </a>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Lainnya</p>
+                <a href="/admin/settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="settings">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Pengaturan</span>
+                </a>
+                <a href="#" id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:bg-danger/20 hover:text-danger transition-all mt-4" style="cursor: pointer;">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+    <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="header-title text-4xl mb-2">Pembayaran SPP</h1>
+                        <p class="text-gray-600">Daftar pembayaran SPP bulanan siswa</p>
+                    </div>
+                    <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Total Pembayaran SPP</p>
+                            <p class="text-3xl font-bold text-gray-900" id="totalPayments">0</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-money-bill text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Total Nominal</p>
+                            <p class="text-3xl font-bold text-gray-900" id="totalAmount">Rp0</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Bulan Ini</p>
+                            <p class="text-3xl font-bold text-gray-900" id="currentMonthCount">0</p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <i class="fas fa-calendar text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Daftar Pembayaran SPP</h2>
+                    <button onclick="location.reload()" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Siswa ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Nama Pengirim</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Bulan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Nominal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Detail -->
+            <div id="detailModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-white text-xl font-bold">Detail Pembayaran SPP</h3>
+                        <button onclick="closeDetailModal()" class="text-white hover:text-gray-200">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-6" id="modalContent">
+                        <!-- Diisi dinamis -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatRupiah(num) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(num);
+        }
+
+        async function loadSppPayments() {
+            try {
+                const response = await fetch('/api/spp_payments');
+                const result = await response.json();
+
+                if (!result.success) {
+                    document.getElementById('tableBody').innerHTML = `
+                        <tr>
+                            <td colspan="7" class="px-6 py-8 text-center text-red-500">
+                                Gagal memuat data: ${result.message}
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                const payments = result.data || [];
+
+                if (payments.length === 0) {
+                    document.getElementById('tableBody').innerHTML = `
+                        <tr>
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                <i class="fas fa-inbox text-3xl mb-2 block"></i>
+                                Tidak ada data pembayaran SPP
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    const rows = payments.map(p => `
+                        <tr class="table-row-hover">
+                            <td class="px-6 py-4 text-sm text-gray-900">${p.id}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${p.siswa_id || '-'}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${p.nama_pengirim || '-'}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${p.payment_month || '-'}</td>
+                            <td class="px-6 py-4 text-sm font-semibold text-green-600">${formatRupiah(p.amount)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">${p.tanggal_pembayaran || '-'}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <button onclick="showDetail(${JSON.stringify(p).replace(/"/g, '&quot;')})" 
+                                    class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    <i class="fas fa-eye mr-1"></i> Detail
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('tableBody').innerHTML = rows;
+                }
+
+                // Update stats
+                updateStats(payments);
+            } catch (error) {
+                console.error('Error loading SPP payments:', error);
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-red-500">
+                            Terjadi kesalahan: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function updateStats(payments) {
+            document.getElementById('totalPayments').textContent = payments.length;
+
+            const totalAmount = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+            document.getElementById('totalAmount').textContent = formatRupiah(totalAmount);
+
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const currentMonthPayments = payments.filter(p => p.payment_month === currentMonth).length;
+            document.getElementById('currentMonthCount').textContent = currentMonthPayments;
+        }
+
+        function showDetail(payment) {
+            const modalContent = document.getElementById('modalContent');
+            const buktiBase64 = payment.bukti_transfer || '';
+            
+            // Try to decode bukti_transfer to detect if it's an image
+            let buktiDisplay = '-';
+            if (buktiBase64) {
+                // Assume it might be an image or other file
+                buktiDisplay = `<small class="text-gray-600">File tersimpan (${buktiBase64.length} chars)</small>`;
+            }
+
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ID Pembayaran</label>
+                        <p class="text-gray-900">${payment.id}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Siswa ID</label>
+                        <p class="text-gray-900">${payment.siswa_id || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengirim</label>
+                        <p class="text-gray-900">${payment.nama_pengirim || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Rekening</label>
+                        <p class="text-gray-900 font-mono">${payment.nomor_rekening_pengirim || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bulan Pembayaran</label>
+                        <p class="text-gray-900">${payment.payment_month || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal</label>
+                        <p class="text-gray-900 font-semibold text-lg">${formatRupiah(payment.amount)}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
+                        <p class="text-gray-900">${payment.catatan || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pembayaran</label>
+                        <p class="text-gray-900">${payment.tanggal_pembayaran || '-'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transfer</label>
+                        <p class="text-gray-700 text-xs">${buktiDisplay}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        // Load on page load
+        window.addEventListener('load', loadSppPayments);
+    </script>
+</body>
+
+</html>

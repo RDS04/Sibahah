@@ -148,28 +148,29 @@
                     <i class="fas fa-tachometer-alt w-5"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                <a href="/admin/students"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
                     data-page="students">
                     <i class="fas fa-users w-5"></i>
                     <span>Data Siswa</span>
                 </a>
-                <a href="/admin/registrations"
+                <!-- <a href="/admin/registrations"
                     class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
                     data-page="registrations">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
-                </a>
-                <a href="javascript:void(0)" onclick="showRiwayat(); closeSidebar();"
-                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
-                    data-page="riwayat">
-                    <i class="fas fa-history w-5"></i>
-                    <span>Riwayat Siswa</span>
-                </a>
+                </a> -->
                 <a href="/admin/payments"
                     class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
                     data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
+                </a>
+                <a href="/admin/spp-payments"
+                    class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
+                    data-page="spp-payments">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Pembayaran SPP</span>
                 </a>
                 <a href="/admin/schedule"
                     class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
@@ -220,8 +221,8 @@
                             A
                         </div>
                         <div class="hidden sm:block">
-                            <p class="text-sm font-semibold text-gray-700">Admin Sibahah</p>
-                            <p class="text-xs text-gray-400">Super Admin</p>
+                            <p class="text-sm font-semibold text-gray-700">{{ admin_username }}</p>
+                            <p class="text-xs text-gray-400">{{ admin_role }}</p>
                         </div>
                     </div>
                 </div>
@@ -238,6 +239,7 @@
         </main>
     </div>
 
+
     <script>
         // ---------- DATA SIMULASI (LocalStorage) ----------
         let studentsData = [];
@@ -249,7 +251,11 @@
             try {
                 const response = await fetch('/api/stats');
                 const result = await response.json();
-                
+
+                // DEBUG: Log the response
+                console.log('[DEBUG] Full API Response:', result);
+                console.log('[DEBUG] total_spp_revenue:', result.total_spp_revenue);
+
                 if (result.success) {
                     return result;
                 } else {
@@ -261,13 +267,24 @@
                 return null;
             }
         }
+        function updateStats(payments) {
+            document.getElementById('totalPayments').textContent = payments.length;
+
+            const totalAmount = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+            document.getElementById('totalAmount').textContent = formatRupiah(totalAmount);
+
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const currentMonthPayments = payments.filter(p => p.payment_month === currentMonth).length;
+            document.getElementById('currentMonthCount').textContent = currentMonthPayments;
+        }
 
         // Fetch semua siswa
         async function fetchStudents() {
             try {
                 const response = await fetch('/api/students');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     studentsData = result.data;
                     console.log('Students loaded:', studentsData);
@@ -284,7 +301,7 @@
             try {
                 const response = await fetch('/api/registrations');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     pendingRegistrations = result.data;
                     console.log('Registrations loaded:', pendingRegistrations);
@@ -301,7 +318,7 @@
             try {
                 const response = await fetch('/api/payments');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     paymentsLog = result.data;
                     console.log('Payments loaded:', paymentsLog);
@@ -367,7 +384,7 @@
             currentPage = 'dashboard';
             pageTitleSpan.innerText = 'Dashboard';
             setActiveNav('dashboard');
-            
+
             // Fetch stats
             fetchDashboardStats().then(stats => {
                 if (!stats) {
@@ -379,6 +396,15 @@
                 const totalPending = stats.total_pendaftaran || 0;
                 const totalPendapatan = stats.total_pendapatan || 0;
                 const totalMenunggu = stats.total_menunggu_bayar || 0;
+                const totalSppRevenue = stats.total_spp_revenue || 0;
+
+                // DEBUG: Log the extracted values
+                console.log('[DEBUG] totalSiswa:', totalSiswa);
+                console.log('[DEBUG] totalPending:', totalPending);
+                console.log('[DEBUG] totalPendapatan:', totalPendapatan);
+                console.log('[DEBUG] totalSppRevenue:', totalSppRevenue);
+                console.log('[DEBUG] totalSppRevenue type:', typeof totalSppRevenue);
+                console.log('[DEBUG] totalSppRevenue boolean check:', Boolean(totalSppRevenue));
 
                 mainContainer.innerHTML = `
                     <div class="space-y-6">
@@ -393,8 +419,12 @@
                                 <p class="text-xs text-accent mt-2">Menunggu pembayaran</p>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-success">
-                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan</p><h3 class="text-2xl font-bold text-darkblue mt-1">Rp ${totalPendapatan.toLocaleString()}</h3></div><div class="bg-success/10 p-3 rounded-full"><i class="fas fa-money-bill-wave text-success text-xl"></i></div></div>
-                                <p class="text-xs text-success mt-2"><i class="fas fa-arrow-up"></i> Dari pendaftaran</p>
+                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan Pendaftaran</p><h3 class="text-2xl font-bold text-darkblue mt-1">Rp ${totalPendapatan.toLocaleString()}</h3></div><div class="bg-success/10 p-3 rounded-full"><i class="fas fa-money-bill-wave text-success text-xl"></i></div></div>
+                                <p class="text-xs text-success mt-2"><i class="fas fa-arrow-up"></i> Dari pendaftaran siswa</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-blue-500">
+                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan SPP</p><h3 class="text-2xl font-bold text-darkblue mt-1">Rp ${totalSppRevenue.toLocaleString()}</h3></div><div class="bg-blue-100 p-3 rounded-full"><i class="fas fa-calendar-check text-blue-500 text-xl"></i></div></div>
+                                <p class="text-xs text-blue-600 mt-2"><i class="fas fa-arrow-up"></i> Dari pembayaran SPP bulanan</p>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-warning">
                                 <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Belum Lunas</p><h3 class="text-2xl font-bold text-darkblue mt-1">${totalMenunggu}</h3></div><div class="bg-warning/10 p-3 rounded-full"><i class="fas fa-hourglass-end text-warning text-xl"></i></div></div>
@@ -414,14 +444,9 @@
                             </div>
                         </div>
                         
-                        <!-- Daftar 5 Siswa Terbaru -->
-                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b flex justify-between items-center"><h3 class="font-semibold text-darkblue"><i class="fas fa-user-graduate mr-2"></i>Siswa Terbaru</h3><button onclick="showStudents()" class="text-primary text-sm">Lihat semua →</button></div>
-                            <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Nama</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Kelas</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Status Bayar</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
-                        </div>
                     </div>
                 `;
-                
+
                 // Chart init
                 setTimeout(() => {
                     const ctx = document.getElementById('classChart')?.getContext('2d');
@@ -433,7 +458,7 @@
                         const labels = Object.keys(classMap);
                         const data = Object.values(classMap);
                         const colors = ['#0A66C2', '#F4A261', '#10B981', '#F59E0B', '#EF4444'];
-                        
+
                         new Chart(ctx, {
                             type: 'doughnut',
                             data: {
@@ -446,7 +471,7 @@
                         });
                     }
                 }, 100);
-                
+
                 // Load breakdown kelas
                 if (stats.breakdown_kelas && stats.breakdown_kelas.length > 0) {
                     const breakdownContainer = document.getElementById('breakdownContainer');
@@ -459,7 +484,7 @@
                         `).join('');
                     }
                 }
-                
+
                 // Load recent students
                 fetchStudents().then(() => {
                     const recentBody = document.getElementById('recentStudentsBody');
@@ -489,15 +514,15 @@
             const searchInput = document.getElementById('studentHistorySearch');
             const searchValue = searchInput.value.trim().toLowerCase();
             const resultDiv = document.getElementById('studentHistoryResult');
-            
+
             if (!searchValue) {
                 resultDiv.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Masukkan nama siswa untuk melihat riwayat.';
                 return;
             }
-            
+
             // Cari di studentsData
             const student = studentsData.find(s => s.nama.toLowerCase().includes(searchValue));
-            
+
             if (!student) {
                 resultDiv.innerHTML = `<div class="bg-red-50 border border-red-200 rounded-lg p-4">
                     <p class="text-red-700 font-medium"><i class="fas fa-exclamation-circle mr-2"></i>Siswa tidak ditemukan</p>
@@ -505,10 +530,13 @@
                 </div>`;
                 return;
             }
-            
+
             // Format biaya
-            const formatRupiah = (num) => 'Rp' + num.toLocaleString('id-ID');
-            
+
+            const formatRupiah = biayaData.uang_pendaftaran + biayaData.uang_spp
+                ? (biayaData.uang_pendaftaran + biayaData.uang_spp).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                : 'Rp 40.000';
+
             let historyHTML = `
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4">
                     <div class="mb-4">
@@ -519,7 +547,7 @@
                         <p class="text-gray-600 text-sm"><i class="fas fa-phone mr-2"></i>WA: ${student.wa}</p>
                     </div>
             `;
-            
+
             // Informasi Pendaftaran
             historyHTML += `
                 <div class="border-t border-blue-200 pt-4 mb-4">
@@ -544,7 +572,7 @@
                     </div>
                 </div>
             `;
-            
+
             // Status Pembayaran
             if (student.status_pembayaran === 'BELUM_BAYAR') {
                 historyHTML += `
@@ -556,7 +584,7 @@
                         </div>
                         <div class="bg-white rounded-lg p-3 mb-3">
                             <p class="text-gray-600 text-xs mb-2">Biaya Pendaftaran:</p>
-                            <p class="text-lg font-bold text-primary">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                            <p class="text-lg font-bold text-primary">${formatRupiah(student.total_pembayaran || 40000)}</p>
                         </div>
                         <a href="/pembayaran?siswa=${student.id}" class="block w-full bg-accent hover:bg-orange-600 text-white font-semibold py-2 rounded-lg text-center transition">
                             <i class="fas fa-arrow-right mr-2"></i>Arahkan ke Halaman Pembayaran
@@ -574,7 +602,7 @@
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div class="bg-white rounded-lg p-3">
                                 <p class="text-gray-600 text-xs mb-1">Biaya Pendaftaran:</p>
-                                <p class="font-bold text-primary">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                                <p class="font-bold text-primary">${formatRupiah(student.total_pembayaran || 40000)}</p>
                             </div>
                             <div class="bg-white rounded-lg p-3">
                                 <p class="text-gray-600 text-xs mb-1">Tgl Pembayaran:</p>
@@ -599,7 +627,7 @@
                     </div>
                 `;
             }
-            
+
             historyHTML += `</div>`;
             resultDiv.innerHTML = historyHTML;
         }
@@ -607,9 +635,9 @@
         function markSPPPayment(studentId) {
             const student = studentsData.find(s => s.id == studentId);
             if (!student) return;
-            
+
             const bulan = prompt(`Catat pembayaran SPP untuk ${student.nama}?\n\nBiaya: Rp ${(student.uang_spp || 100000).toLocaleString()}\n\nMasukkan bulan (contoh: Januari, Februari, dll):`);
-            
+
             if (bulan) {
                 alert(`✅ Pembayaran SPP ${bulan} untuk ${student.nama} berhasil dicatat!\n\nBiaya: Rp ${(student.uang_spp || 100000).toLocaleString()}`);
             }
@@ -620,7 +648,7 @@
             currentPage = 'riwayat';
             pageTitleSpan.innerText = 'Riwayat & Status Siswa';
             setActiveNav('riwayat');
-            
+
             mainContainer.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b"><h3 class="font-semibold text-darkblue text-xl"><i class="fas fa-history text-primary mr-2"></i>Riwayat & Status Siswa</h3></div>
@@ -635,63 +663,21 @@
                     </div>
                 </div>
             `;
-            
+
             // Pastikan data sudah di-load
             fetchStudents();
         }
 
-        async function showStudents() {
-            currentPage = 'students';
-            pageTitleSpan.innerText = 'Data Siswa';
-            setActiveNav('students');
-            
-            await fetchStudents();
-            
-            mainContainer.innerHTML = `
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-                    <div class="flex flex-wrap justify-between items-center mb-5 gap-3">
-                        <h2 class="text-xl font-bold text-darkblue"><i class="fas fa-users text-primary mr-2"></i>Daftar Siswa Terdaftar</h2>
-                        <button onclick="exportStudentData()" class="bg-success text-white px-4 py-2 rounded-lg text-sm"><i class="fas fa-download"></i> Export Excel</button>
-                    </div>
-                    <div class="mb-4 flex gap-2 flex-wrap">
-                        <input type="text" placeholder="Cari nama siswa..." id="searchInput" class="px-4 py-2 border rounded-lg text-sm" onkeyup="filterStudentsTable()">
-                        <select id="statusFilter" class="px-4 py-2 border rounded-lg text-sm" onchange="filterStudentsTable()">
-                            <option value="">Semua Status</option>
-                            <option value="SUDAH_BAYAR">Lunas</option>
-                            <option value="BELUM_BAYAR">Belum Bayar</option>
-                        </select>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">No</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Nama</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Orang Tua</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">No. WA</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Kelas</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Jadwal</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Status</th>
-                                    <th class="px-5 py-3 text-left text-xs font-bold">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            renderStudentsTable();
-        }
-        
+
         function renderStudentsTable() {
             const tbody = document.getElementById('studentsTableBody');
             if (!tbody) return;
-            
+
             if (studentsData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="px-5 py-3 text-center text-gray-500">Tidak ada data siswa</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = studentsData.map((s, idx) => `
                 <tr class="table-row-hover border-b">
                     <td class="px-5 py-3 text-sm">${idx + 1}</td>
@@ -711,24 +697,24 @@
                 </tr>
             `).join('');
         }
-        
+
         function filterStudentsTable() {
             const searchValue = document.getElementById('searchInput').value.toLowerCase();
             const statusValue = document.getElementById('statusFilter').value;
-            
+
             const filtered = studentsData.filter(s => {
                 const matchSearch = s.nama?.toLowerCase().includes(searchValue) || s.ortu?.toLowerCase().includes(searchValue);
                 const matchStatus = !statusValue || s.status_pembayaran === statusValue;
                 return matchSearch && matchStatus;
             });
-            
+
             const tbody = document.getElementById('studentsTableBody');
-            
+
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="px-5 py-3 text-center text-gray-500">Tidak ada data yang cocok</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = filtered.map((s, idx) => `
                 <tr class="table-row-hover border-b">
                     <td class="px-5 py-3 text-sm">${idx + 1}</td>
@@ -748,7 +734,7 @@
                 </tr>
             `).join('');
         }
-        
+
         function viewStudentDetail(id) {
             const student = studentsData.find(s => s.id === id);
             if (!student) return;
@@ -760,9 +746,9 @@
             currentPage = 'registrations';
             pageTitleSpan.innerText = 'Pendaftaran Baru';
             setActiveNav('registrations');
-            
+
             await fetchRegistrations();
-            
+
             mainContainer.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h2 class="text-xl font-bold text-darkblue mb-4"><i class="fas fa-file-signature text-accent mr-2"></i>Verifikasi Pendaftaran</h2>
@@ -783,19 +769,19 @@
                     </div>
                 </div>
             `;
-            
+
             renderPendingRegistrations();
         }
 
         function renderPendingRegistrations() {
             const tbody = document.getElementById('pendingTableBody');
             if (!tbody) return;
-            
+
             if (pendingRegistrations.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-500">Tidak ada registrasi menunggu</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = pendingRegistrations.map(p => `
                 <tr class="border-b">
                     <td class="p-3 font-medium">${p.nama}</td>
@@ -813,9 +799,9 @@
             currentPage = 'payments';
             pageTitleSpan.innerText = 'Manajemen Pembayaran';
             setActiveNav('payments');
-            
+
             await fetchPayments();
-            
+
             mainContainer.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h2 class="text-xl font-bold text-darkblue mb-4"><i class="fas fa-credit-card text-primary mr-2"></i>Riwayat Pembayaran Registrasi</h2>
@@ -837,7 +823,7 @@
                     </div>
                 </div>
             `;
-            
+
             const tbody = document.getElementById('paymentsBody');
             if (tbody) {
                 if (paymentsLog.length === 0) {
@@ -858,9 +844,9 @@
             }
         }
 
-        function showSchedule() { 
-            pageTitleSpan.innerText = 'Jadwal Latihan'; 
-            setActiveNav('schedule'); 
+        function showSchedule() {
+            pageTitleSpan.innerText = 'Jadwal Latihan';
+            setActiveNav('schedule');
             mainContainer.innerHTML = `
                 <div class="bg-white rounded-2xl p-6">
                     <h2 class="text-xl font-bold">📅 Jadwal Mingguan</h2>
@@ -879,12 +865,12 @@
                         </div>
                     </div>
                 </div>
-            `; 
+            `;
         }
 
-        function showSettings() { 
-            pageTitleSpan.innerText = 'Pengaturan'; 
-            setActiveNav('settings'); 
+        function showSettings() {
+            pageTitleSpan.innerText = 'Pengaturan';
+            setActiveNav('settings');
             mainContainer.innerHTML = `
                 <div class="bg-white rounded-2xl p-6">
                     <h2 class="text-xl font-bold">⚙️ Pengaturan Akun</h2>
@@ -895,34 +881,57 @@
                         </button>
                     </div>
                 </div>
-            `; 
+            `;
         }
 
-        function exportStudentData() {
-            if (studentsData.length === 0) {
-                alert('Tidak ada data untuk diexport');
-                return;
+        async function exportStudentData() {
+            try {
+                // Fetch data dari API
+                const response = await fetch('/api/students');
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    alert('Tidak ada data untuk diexport');
+                    return;
+                }
+
+                const students = result.data;
+                let csv = "No,Nama,Orang Tua,No WA,Kelas,Jadwal,Gender,Usia,Status,Email,Tgl Daftar\n";
+
+                students.forEach((s, idx) => {
+                    csv += `${idx + 1},"${s.nama || '-'}","${s.ortu || '-'}","${s.wa || '-'}","${s.kelas || '-'}","${s.jadwal || '-'}","${s.gender || '-'}","${s.usia || '-'}","${s.status_pembayaran === 'SUDAH_BAYAR' ? 'Lunas' : 'Belum Bayar'}","${s.email || '-'}","${s.tanggal_daftar || '-'}"\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `data_siswa_${new Date().toISOString().split('T')[0]}.csv`);
+                link.click();
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('❌ Gagal export data');
             }
-            
-            let csv = "No,Nama,Orang Tua,No WA,Kelas,Jadwal,Gender,Usia,Status,Email,Tgl Daftar\n";
-            studentsData.forEach((s, idx) => {
-                csv += `${idx + 1},"${s.nama || '-'}","${s.ortu || '-'}","${s.wa || '-'}","${s.kelas || '-'}","${s.jadwal || '-'}","${s.gender || '-'}","${s.usia || '-'}","${s.status_pembayaran === 'SUDAH_BAYAR' ? 'Lunas' : 'Belum Bayar'}","${s.email || '-'}","${s.tanggal_daftar || '-'}"\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `data_siswa_${new Date().toISOString().split('T')[0]}.csv`);
-            link.click();
         }
 
         // Load data saat halaman dibuka
         document.addEventListener('DOMContentLoaded', () => {
+            // Data sudah diverifikasi oleh Flask @admin_required decorator
+            // Ambil username dari template Flask
+            const username = '{{ admin_username }}';
+            const role = '{{ admin_role }}';
+            const adminId = '{{ admin_id }}';
+
+            // Update header dengan username
+            const profileName = document.querySelector('.profile-name');
+            if (profileName && username) {
+                profileName.textContent = username;
+            }
+
             loadData();
             showDashboard();
         });
-        
+
         // Inisialisasi
         showDashboard();
 
@@ -933,9 +942,26 @@
         document.getElementById('mobileOverlay')?.addEventListener('click', closeSidebar);
 
         // Logout
-        document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (confirm("Yakin ingin logout?")) alert("Anda telah logout (simulasi).");
+            if (confirm("Yakin ingin logout?")) {
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Redirect to login
+                        window.location.href = '/admin/login';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Gagal logout');
+                }
+            }
         });
     </script>
 </body>

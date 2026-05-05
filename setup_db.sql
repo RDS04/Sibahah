@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     nama_pengirim VARCHAR(100),
     nomor_rekening_pengirim VARCHAR(50),
     catatan_transfer TEXT,
-    bukti_transfer LONGBLOB
+    bukti_transfer LONGBLOB,
+    uang_pendaftaran INT DEFAULT 40000,
+    uang_spp INT DEFAULT 100000,
+    total_pembayaran INT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Indexing untuk pencarian lebih cepat
