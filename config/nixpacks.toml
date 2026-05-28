@@ -1,0 +1,1 @@
+cmd = "gunicorn main:app --bind [::]:${PORT-5000} -k uvicorn.workers.UvicornWorker"
