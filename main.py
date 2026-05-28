@@ -19,11 +19,11 @@ class DateTimeEncoder(json.JSONEncoder):
 def getDatabase():
     try:
         conn = mysql.connector.connect(
-            host="zephyr.proxy.rlwy.net",
+            host="mysql-vmzh.railway.internal",
             user="root",
             password="PPWFKHBDghgZIohEKMeOobwAWOQtvtQu",
             database="railway",
-            port=56710
+            port=3306
         )
 
         print("DATABASE CONNECTED")
