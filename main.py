@@ -23,7 +23,7 @@ def getDatabase():
             user="root",
             password="PPWFKHBDghgZIohEKMeOobwAWOQtvtQu",
             database="railway",
-            port=3306
+            port=56710
         )
 
         print("DATABASE CONNECTED")
