@@ -21,7 +21,7 @@ def getDatabase():
         conn = mysql.connector.connect(
             host="mysql.railway.internal",
             user="root",
-            password="PASSWORD_KAMU",
+            password="PPWFKHBDghgZIohEKMeOobwAWOQtvtQu",
             database="railway",
             port=3306
         )
