@@ -8,4 +8,3 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 mysql-connector-python==9.4.0
 Werkzeug==3.1.8
-gunicorn
