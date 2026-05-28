@@ -15,14 +15,22 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
         return super().default(obj)
 
+
 def getDatabase():
-    return mysql.connector.connect(
-        host="mysql.railway.internal",
-        user="root",
-        password="PPWFKHBDghgZIohEKMeOobwAWOQtvtQu",
-        database="railway",
-        port=3306
-    )
+    try:
+        conn = mysql.connector.connect(
+            host="mysql.railway.internal",
+            user="root",
+            password="PASSWORD_KAMU",
+            database="railway",
+            port=3306
+        )
+
+        print("DATABASE CONNECTED")
+        return conn
+
+    except Exception as e:
+        print("DATABASE ERROR:", e)
 
 def ensure_spp_payments_table():
     """Pastikan tabel spp_payments sudah ada"""
