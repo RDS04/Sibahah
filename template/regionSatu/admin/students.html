@@ -295,6 +295,84 @@
         </main>
     </div>
 
+    <!-- Edit Student Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 flex items-center justify-between">
+                <h2 class="text-2xl font-bold"><i class="fas fa-edit mr-2"></i>Edit Data Siswa</h2>
+                <button onclick="closeEditModal()" class="text-white hover:text-gray-200 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); saveEditStudent();" class="p-6 space-y-4">
+                <input type="hidden" id="editStudentId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Siswa *</label>
+                        <input type="text" id="editNama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Nama lengkap">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Orang Tua *</label>
+                        <input type="text" id="editOrtu" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Nama orang tua">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">No. WhatsApp *</label>
+                        <input type="text" id="editWA" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Nomor WA">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                        <input type="email" id="editEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Email">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas *</label>
+                        <input type="text" id="editKelas" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Kelas">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Jadwal *</label>
+                        <input type="text" id="editJadwal" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Jadwal">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Kelamin</label>
+                        <select id="editGender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            <option value="">Pilih</option>
+                            <option value="Putra">Putra</option>
+                            <option value="Putri">Putri</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Usia</label>
+                        <input type="number" id="editUsia" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Usia">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan</label>
+                    <textarea id="editCatatan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Catatan tambahan" rows="3"></textarea>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-6 border-t">
+                    <button type="button" onclick="closeEditModal()" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold">
+                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let studentsData = [];
 
@@ -349,9 +427,10 @@
                             ${getStatusDisplay(s.status_pembayaran)}
                         </span>
                     </td>
-                    <td class="px-6 py-3 text-sm">
-                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Detail</button>
-                        <button onclick="editStudent(${s.id})" class="text-orange-600 hover:text-orange-800 font-medium text-xs">Edit</button>
+                    <td class="px-6 py-3 text-sm space-x-1">
+                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 px-2 py-1" title="Detail"><i class="fas fa-eye"></i></button>
+                        <button onclick="openEditModal(${s.id})" class="text-orange-600 hover:text-orange-800 px-2 py-1" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteStudent(${s.id})" class="text-red-600 hover:text-red-800 px-2 py-1" title="Hapus"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -387,9 +466,10 @@
                             ${getStatusDisplay(s.status_pembayaran)}
                         </span>
                     </td>
-                    <td class="px-6 py-3 text-sm">
-                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Detail</button>
-                        <button onclick="editStudent(${s.id})" class="text-orange-600 hover:text-orange-800 font-medium text-xs">Edit</button>
+                    <td class="px-6 py-3 text-sm space-x-1">
+                        <button onclick="viewDetail(${s.id})" class="text-blue-600 hover:text-blue-800 px-2 py-1" title="Detail"><i class="fas fa-eye"></i></button>
+                        <button onclick="openEditModal(${s.id})" class="text-orange-600 hover:text-orange-800 px-2 py-1" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteStudent(${s.id})" class="text-red-600 hover:text-red-800 px-2 py-1" title="Hapus"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -404,8 +484,99 @@
             window.open(`/admin/student-detail?id=${id}`, '_blank');
         }
 
-        function editStudent(id) {
-            alert(`Fitur edit siswa untuk ID ${id} siap diimplementasikan.`);
+        function openEditModal(id) {
+            const student = studentsData.find(s => s.id === id);
+            if (!student) {
+                alert('Data siswa tidak ditemukan');
+                return;
+            }
+            
+            // Populate form dengan data siswa
+            document.getElementById('editStudentId').value = student.id;
+            document.getElementById('editNama').value = student.nama || '';
+            document.getElementById('editOrtu').value = student.ortu || '';
+            document.getElementById('editWA').value = student.wa || '';
+            document.getElementById('editEmail').value = student.email || '';
+            document.getElementById('editKelas').value = student.kelas || '';
+            document.getElementById('editJadwal').value = student.jadwal || '';
+            document.getElementById('editGender').value = student.gender || '';
+            document.getElementById('editUsia').value = student.usia || '';
+            document.getElementById('editCatatan').value = student.catatan || '';
+            
+            // Show modal
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').classList.remove('flex');
+        }
+
+        async function saveEditStudent() {
+            const id = document.getElementById('editStudentId').value;
+            const formData = {
+                nama: document.getElementById('editNama').value,
+                ortu: document.getElementById('editOrtu').value,
+                wa: document.getElementById('editWA').value,
+                email: document.getElementById('editEmail').value,
+                kelas: document.getElementById('editKelas').value,
+                jadwal: document.getElementById('editJadwal').value,
+                gender: document.getElementById('editGender').value,
+                usia: document.getElementById('editUsia').value,
+                catatan: document.getElementById('editCatatan').value
+            };
+
+            try {
+                const response = await fetch(`/api/students/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('✓ Data siswa berhasil diperbarui');
+                    closeEditModal();
+                    fetchStudentsData();
+                } else {
+                    alert('❌ Gagal update: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Terjadi kesalahan saat update data');
+            }
+        }
+
+        function deleteStudent(id) {
+            const student = studentsData.find(s => s.id === id);
+            if (!student) {
+                alert('Data siswa tidak ditemukan');
+                return;
+            }
+
+            if (confirm(`Apakah Anda yakin ingin menghapus data ${student.nama}?\n\nTindakan ini tidak dapat dibatalkan.`)) {
+                deleteConfirmed(id, student.nama);
+            }
+        }
+
+        async function deleteConfirmed(id, nama) {
+            try {
+                const response = await fetch(`/api/students/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(`✓ Data siswa "${nama}" berhasil dihapus`);
+                    fetchStudentsData();
+                } else {
+                    alert('❌ Gagal hapus: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Terjadi kesalahan saat menghapus data');
+            }
         }
 
         function exportStudentData() {

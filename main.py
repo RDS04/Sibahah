@@ -644,6 +644,94 @@ def api_students():
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
 
+# API: UPDATE data siswa
+@app.route('/api/students/<int:student_id>', methods=['PUT'])
+def api_update_student(student_id):
+    try:
+        data = request.get_json()
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Cek apakah siswa ada
+        cursor.execute("SELECT id FROM pendaftaran WHERE id = %s", (student_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Data siswa tidak ditemukan'}), 404
+        
+        # Update data
+        update_query = """
+            UPDATE pendaftaran 
+            SET nama = %s, ortu = %s, wa = %s, email = %s, 
+                kelas = %s, jadwal = %s, gender = %s, usia = %s, catatan = %s
+            WHERE id = %s
+        """
+        
+        cursor.execute(update_query, (
+            data.get('nama'),
+            data.get('ortu'),
+            data.get('wa'),
+            data.get('email'),
+            data.get('kelas'),
+            data.get('jadwal'),
+            data.get('gender'),
+            data.get('usia'),
+            data.get('catatan'),
+            student_id
+        ))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Data siswa berhasil diperbarui'
+        }), 200
+        
+    except Error as err:
+        print(f"[API UPDATE STUDENT] Database error: {err}")
+        return jsonify({'success': False, 'message': f'Database error: {str(err)}'}), 500
+    except Exception as e:
+        print(f"[API UPDATE STUDENT] Error: {e}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
+# API: DELETE data siswa
+@app.route('/api/students/<int:student_id>', methods=['DELETE'])
+def api_delete_student(student_id):
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Cek apakah siswa ada
+        cursor.execute("SELECT nama FROM pendaftaran WHERE id = %s", (student_id,))
+        student = cursor.fetchone()
+        if not student:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Data siswa tidak ditemukan'}), 404
+        
+        # Delete data
+        cursor.execute("DELETE FROM pendaftaran WHERE id = %s", (student_id,))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Data siswa berhasil dihapus'
+        }), 200
+        
+    except Error as err:
+        print(f"[API DELETE STUDENT] Database error: {err}")
+        return jsonify({'success': False, 'message': f'Database error: {str(err)}'}), 500
+    except Exception as e:
+        print(f"[API DELETE STUDENT] Error: {e}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
 # API: GET statistik dashboard
 @app.route('/api/stats', methods=['GET'])
 def api_stats():
