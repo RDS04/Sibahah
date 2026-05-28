@@ -15,13 +15,13 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
         return super().default(obj)
 
-
 def getDatabase():
     return mysql.connector.connect(
         host="mysql.railway.internal",
         user="root",
-        password="wwZUCGQiVGaHHzFSaddwYlNUvAcsdmcl",
-        database="railway"
+        password="PPWFKHBDghgZIohEKMeOobwAWOQtvtQu",
+        database="railway",
+        port=3306
     )
 
 def ensure_spp_payments_table():

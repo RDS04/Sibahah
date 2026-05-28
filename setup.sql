@@ -2,9 +2,7 @@
 -- Database: sekolah_renang_sibahah
 -- ====================================
 
--- Buat database jika belum ada
-CREATE DATABASE IF NOT EXISTS sekolah_renang_sibahah;
-USE sekolah_renang_sibahah;
+
 
 -- ====================================
 -- Tabel 1: admin_users
