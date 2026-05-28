@@ -93,76 +93,76 @@
 <body>
 
     <!-- NAVIGATION -->
-    <nav class="bg-darkblue text-white py-4 sticky top-0 z-50 shadow-lg">
-        <div class="max-w-6xl mx-auto px-5 flex justify-between items-center">
+    <nav class="bg-darkblue text-white py-3 sm:py-4 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 sm:px-5 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="bg-primary w-8 h-8 rounded-full flex items-center justify-center">
-                    <i class="fas fa-water text-white text-sm"></i>
+                <div class="bg-primary w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-water text-white text-xs sm:text-sm"></i>
                 </div>
-                <span class="font-bold text-xl">Sibahah<span class="text-secondary">|Renang</span></span>
+                <span class="font-bold text-base sm:text-xl truncate">Sibahah<span class="text-secondary">|Renang</span></span>
             </div>
-            <div class="flex gap-3">
-                <a href="/" class="text-white/80 hover:text-white px-3 py-2 text-sm"><i class="fas fa-home mr-1"></i> Beranda</a>
-                <a href="/pendaftaran" class="bg-primary text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700"><i class="fas fa-user-plus mr-1"></i> Daftar</a>
+            <div class="flex gap-2 sm:gap-3">
+                <a href="/" class="text-white/80 hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap"><i class="fas fa-home mr-1 sm:mr-2"></i><span class="hidden sm:inline">Beranda</span></a>
+                <a href="/pendaftaran" class="bg-primary text-white px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm hover:bg-blue-700 whitespace-nowrap"><i class="fas fa-user-plus mr-1 sm:mr-2"></i><span class="hidden sm:inline">Daftar</span></a>
             </div>
         </div>
     </nav>
 
     <!-- MAIN CONTENT -->
-    <div class="max-w-4xl mx-auto px-5 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-5 py-8 sm:py-12">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-primary to-secondary text-white p-6">
-                <h1 class="text-3xl font-bold flex items-center gap-2">
-                    <i class="fas fa-history text-2xl"></i>Riwayat & Status Siswa
+            <div class="bg-gradient-to-r from-primary to-secondary text-white p-4 sm:p-6">
+                <h1 class="text-xl sm:text-3xl font-bold flex items-center gap-2 flex-wrap">
+                    <i class="fas fa-history text-lg sm:text-2xl flex-shrink-0"></i><span class="truncate">Riwayat & Status Siswa</span>
                 </h1>
-                <p class="text-white/90 mt-1">Cek status pendaftaran dan riwayat pembayaran Anda</p>
+                <p class="text-white/90 mt-2 text-xs sm:text-base">Cek status pendaftaran dan riwayat pembayaran Anda</p>
             </div>
 
             <!-- Search Section -->
-            <div class="p-6 border-b">
-                <label class="block text-sm font-semibold text-darkblue mb-3">Masukkan Nama Siswa:</label>
-                <div class="flex gap-3 flex-col md:flex-row">
+            <div class="p-4 sm:p-6 border-b">
+                <label class="block text-xs sm:text-sm font-semibold text-darkblue mb-3">Masukkan Nama Siswa:</label>
+                <div class="flex gap-2 sm:gap-3 flex-col sm:flex-row">
                     <input type="text" id="searchInput" placeholder="Contoh: Ahmad Rizki, Siti Nur, dll..." 
-                        class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-sm">
+                        class="flex-1 px-3 sm:px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-sm" style="font-size: 16px;">
                     <button onclick="searchStudent()" 
-                        class="bg-primary hover:bg-darkblue text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 justify-center">
-                        <i class="fas fa-search"></i> Cari
+                        class="bg-primary hover:bg-darkblue text-white px-4 sm:px-6 py-3 min-h-[44px] rounded-lg font-semibold transition flex items-center gap-2 justify-center whitespace-nowrap flex-shrink-0">
+                        <i class="fas fa-search text-sm sm:text-base"></i><span class="hidden sm:inline">Cari</span>
                     </button>
                 </div>
             </div>
 
             <!-- Result Section -->
-            <div class="p-6" id="resultContainer">
+            <div class="p-4 sm:p-6" id="resultContainer">
                 <div class="text-center py-8">
-                    <i class="fas fa-info-circle text-primary text-4xl mb-3"></i>
-                    <p class="text-gray-500 text-sm">Masukkan nama siswa untuk melihat riwayat pendaftaran dan status pembayaran.</p>
+                    <i class="fas fa-info-circle text-primary text-3xl sm:text-4xl mb-3"></i>
+                    <p class="text-gray-500 text-xs sm:text-sm">Masukkan nama siswa untuk melihat riwayat pendaftaran dan status pembayaran.</p>
                 </div>
             </div>
         </div>
 
         <!-- Info Box -->
-        <div class="mt-8 bg-blue-50 border-l-4 border-primary rounded p-4">
-            <p class="text-sm text-gray-700"><i class="fas fa-lightbulb text-warning mr-2"></i>
+        <div class="mt-6 sm:mt-8 bg-blue-50 border-l-4 border-primary rounded p-3 sm:p-4">
+            <p class="text-xs sm:text-sm text-gray-700"><i class="fas fa-lightbulb text-warning mr-2 flex-shrink-0"></i>
                 <strong>Catatan:</strong> Jika Anda belum menemukan data, silakan hubungi admin di WhatsApp <strong>+62 812 3456 7890</strong> untuk verifikasi data.</p>
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer class="bg-darkblue text-white py-8 mt-16"
+    <footer class="bg-darkblue text-white py-6 sm:py-8 mt-12 sm:mt-16"
         style="background: linear-gradient(135deg, #003459 0%, #0A66C2 100%);">
-        <div class="max-w-6xl mx-auto px-5 text-center">
-            <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/20 pb-5 mb-5">
-                <div class="flex items-center gap-2 mx-auto md:mx-0"><i class="fas fa-water text-2xl"></i><span
-                        class="font-bold text-xl">SEKOLAH RENANG SIBAHAH</span></div>
-                <div class="text-sm italic">"Bisa, Yakin, Mampu & Berkarakter"</div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-5 text-center">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-white/20 pb-4 sm:pb-5 mb-4 sm:mb-5">
+                <div class="flex items-center gap-2 justify-center sm:justify-start"><i class="fas fa-water text-lg sm:text-2xl flex-shrink-0"></i><span
+                        class="font-bold text-sm sm:text-xl truncate">SEKOLAH RENANG SIBAHAH</span></div>
+                <div class="text-xs sm:text-sm italic">"Bisa, Yakin, Mampu & Berkarakter"</div>
             </div>
-            <div class="grid md:grid-cols-3 gap-4 text-sm text-left text-white/80">
-                <div><i class="fas fa-map-marker-alt mr-2"></i> Kolam Renang Hotel Sakura Syariah</div>
-                <div><i class="fas fa-phone-alt mr-2"></i> +62 812-7571-9898 (Admin)</div>
-                <div><i class="fab fa-instagram mr-2"></i> @sibahah_renang</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm text-left text-white/80">
+                <div><i class="fas fa-map-marker-alt mr-2 flex-shrink-0"></i> <span>Kolam Renang Hotel Sakura Syariah</span></div>
+                <div><i class="fas fa-phone-alt mr-2 flex-shrink-0"></i> <span>+62 812-7571-9898 (Admin)</span></div>
+                <div><i class="fab fa-instagram mr-2 flex-shrink-0"></i> <span>@sibahah_renang</span></div>
             </div>
-            <div class="text-xs text-white/60 mt-6">© 2026 Sibahah Swimming School | Program Latihan Terstruktur Putra Putri Terpisah.</div>
+            <div class="text-xs text-white/60 mt-4 sm:mt-6">© 2026 Sibahah Swimming School | Program Latihan Terstruktur Putra Putri Terpisah.</div>
         </div>
     </footer>
 
@@ -215,10 +215,10 @@
             
             if (!student) {
                 resultContainer.innerHTML = `
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                        <i class="fas fa-search text-red-500 text-3xl mb-3"></i>
-                        <p class="text-red-700 font-semibold">Siswa Tidak Ditemukan</p>
-                        <p class="text-red-600 text-sm mt-1">Coba cari dengan nama lengkap atau sebagian nama.</p>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 text-center">
+                        <i class="fas fa-search text-red-500 text-2xl sm:text-3xl mb-3"></i>
+                        <p class="text-red-700 font-semibold text-sm sm:text-base">Siswa Tidak Ditemukan</p>
+                        <p class="text-red-600 text-xs sm:text-sm mt-1">Coba cari dengan nama lengkap atau sebagian nama.</p>
                     </div>
                 `;
                 return;
@@ -226,129 +226,129 @@
 
             // Render hasil
             let html = `
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-6">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4 sm:p-6">
                     <!-- Info Siswa -->
-                    <div class="mb-6 pb-6 border-b border-blue-200">
-                        <h2 class="text-2xl font-bold text-darkblue flex items-center gap-2 mb-3">
-                            <i class="fas fa-user-circle text-primary text-3xl"></i>${student.nama}
+                    <div class="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-blue-200">
+                        <h2 class="text-lg sm:text-2xl font-bold text-darkblue flex items-center gap-2 mb-3 flex-wrap">
+                            <i class="fas fa-user-circle text-primary text-2xl sm:text-3xl flex-shrink-0"></i><span class="truncate">${student.nama}</span>
                         </h2>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
                             <div>
                                 <p class="text-gray-600">Orang Tua</p>
-                                <p class="font-semibold text-darkblue">${student.ortu}</p>
+                                <p class="font-semibold text-darkblue text-xs sm:text-base truncate">${student.ortu}</p>
                             </div>
                             <div>
                                 <p class="text-gray-600">No. WA</p>
-                                <p class="font-semibold text-darkblue">${student.wa}</p>
+                                <p class="font-semibold text-darkblue text-xs sm:text-base truncate">${student.wa}</p>
                             </div>
                             <div>
                                 <p class="text-gray-600">Email</p>
-                                <p class="font-semibold text-darkblue text-xs">${student.email || '-'}</p>
+                                <p class="font-semibold text-darkblue text-xs sm:text-base truncate">${student.email || '-'}</p>
                             </div>
                             <div>
                                 <p class="text-gray-600">Usia</p>
-                                <p class="font-semibold text-darkblue">${student.usia || '-'} tahun</p>
+                                <p class="font-semibold text-darkblue text-xs sm:text-base">${student.usia || '-'} tahun</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Riwayat Pendaftaran -->
-                    <div class="mb-6 pb-6 border-b border-blue-200">
-                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
-                            <i class="fas fa-file-alt text-accent"></i>Riwayat Pendaftaran
+                    <div class="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-blue-200">
+                        <h3 class="text-base sm:text-lg font-bold text-darkblue mb-3 sm:mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-accent flex-shrink-0"></i>Riwayat Pendaftaran
                         </h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
+                            <div class="bg-white rounded-lg p-2 sm:p-3 shadow-sm">
                                 <p class="text-gray-600 text-xs mb-1">Kelas</p>
-                                <p class="font-bold text-darkblue">${student.kelas}</p>
+                                <p class="font-bold text-darkblue truncate">${student.kelas}</p>
                             </div>
-                            <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <div class="bg-white rounded-lg p-2 sm:p-3 shadow-sm">
                                 <p class="text-gray-600 text-xs mb-1">Jadwal</p>
-                                <p class="font-bold text-darkblue">${student.jadwal}</p>
+                                <p class="font-bold text-darkblue truncate">${student.jadwal}</p>
                             </div>
-                            <div class="bg-white rounded-lg p-3 shadow-sm">
-                                <p class="text-gray-600 text-xs mb-1">Jenis Kelamin</p>
-                                <p class="font-bold text-darkblue">${student.gender === 'Putra' ? '👦 Putra' : '👧 Putri'}</p>
+                            <div class="bg-white rounded-lg p-2 sm:p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Kelamin</p>
+                                <p class="font-bold text-darkblue">${student.gender === 'Putra' ? '👦' : '👧'}</p>
                             </div>
-                            <div class="bg-white rounded-lg p-3 shadow-sm">
-                                <p class="text-gray-600 text-xs mb-1">Tanggal Daftar</p>
-                                <p class="font-bold text-darkblue">${student.tanggal_daftar || '-'}</p>
+                            <div class="bg-white rounded-lg p-2 sm:p-3 shadow-sm">
+                                <p class="text-gray-600 text-xs mb-1">Tgl Daftar</p>
+                                <p class="font-bold text-darkblue truncate">${student.tanggal_daftar || '-'}</p>
                             </div>
                         </div>
-                        ${student.catatan ? `<p class="text-sm text-gray-600 mt-3"><i class="fas fa-sticky-note text-warning mr-1"></i>Catatan: ${student.catatan}</p>` : ''}
+                        ${student.catatan ? `<p class="text-xs sm:text-sm text-gray-600 mt-3"><i class="fas fa-sticky-note text-warning mr-1 flex-shrink-0"></i><span>Catatan: ${student.catatan}</span></p>` : ''}
                     </div>
             `;
 
             // Status Pembayaran
             if (student.status_pembayaran === 'BELUM_BAYAR') {
                 html += `
-                    <div class="mb-6 pb-6 border-b border-blue-200">
-                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
-                            <i class="fas fa-hourglass-end text-warning"></i>Status Pembayaran
+                    <div class="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-blue-200">
+                        <h3 class="text-base sm:text-lg font-bold text-darkblue mb-3 sm:mb-4 flex items-center gap-2">
+                            <i class="fas fa-hourglass-end text-warning flex-shrink-0"></i>Status Pembayaran
                         </h3>
-                        <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
-                            <p class="text-yellow-800 font-semibold mb-2">
-                                <i class="fas fa-clock mr-2"></i>Status: 
+                        <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3 sm:p-4 mb-4">
+                            <p class="text-yellow-800 font-semibold mb-2 text-xs sm:text-base">
+                                <i class="fas fa-clock mr-2 flex-shrink-0"></i>Status: 
                                 <span class="status-badge status-pending">BELUM BAYAR</span>
                             </p>
-                            <p class="text-yellow-700 text-sm">Anda masih perlu menyelesaikan pembayaran biaya pendaftaran.</p>
+                            <p class="text-yellow-700 text-xs sm:text-sm">Anda masih perlu menyelesaikan pembayaran biaya pendaftaran.</p>
                         </div>
-                        <div class="bg-white rounded-lg p-4 mb-4 border border-blue-200">
+                        <div class="bg-white rounded-lg p-3 sm:p-4 mb-4 border border-blue-200">
                             <p class="text-gray-600 text-xs mb-2">Biaya Pendaftaran yang Harus Dibayar:</p>
-                            <p class="text-3xl font-bold text-primary">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-primary">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
                         </div>
-                        <button onclick="goToPayment(${student.id}, '${student.nama}', ${student.uang_pendaftaran || 40000}, ${student.uang_spp || 160000})" class="block w-full bg-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-center transition">
-                            <i class="fas fa-credit-card mr-2"></i>Lanjut ke Pembayaran
+                        <button onclick="goToPayment(${student.id}, '${student.nama}', ${student.uang_pendaftaran || 40000}, ${student.uang_spp || 160000})" class="block w-full bg-accent hover:bg-orange-600 text-white font-bold py-3 min-h-[44px] rounded-lg text-center transition text-sm sm:text-base">
+                            <i class="fas fa-credit-card mr-2 flex-shrink-0"></i>Lanjut ke Pembayaran
                         </button>
                     </div>
                 `;
             } else {
                 html += `
-                    <div class="mb-6 pb-6 border-b border-blue-200">
-                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
-                            <i class="fas fa-check-circle text-success"></i>Status Pembayaran
+                    <div class="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-blue-200">
+                        <h3 class="text-base sm:text-lg font-bold text-darkblue mb-3 sm:mb-4 flex items-center gap-2">
+                            <i class="fas fa-check-circle text-success flex-shrink-0"></i>Status Pembayaran
                         </h3>
-                        <div class="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
-                            <p class="text-green-800 font-semibold mb-2">
-                                <i class="fas fa-check-circle mr-2"></i>Status: 
+                        <div class="bg-green-50 border-2 border-green-300 rounded-lg p-3 sm:p-4 mb-4">
+                            <p class="text-green-800 font-semibold mb-2 text-xs sm:text-base">
+                                <i class="fas fa-check-circle mr-2 flex-shrink-0"></i>Status: 
                                 <span class="status-badge status-active">LUNAS</span>
                             </p>
-                            <p class="text-green-700 text-sm">Pendaftaran Anda telah berhasil diverifikasi dan pembayaran telah diterima.</p>
+                            <p class="text-green-700 text-xs sm:text-sm">Pendaftaran Anda telah berhasil diverifikasi dan pembayaran telah diterima.</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+                        <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+                            <div class="bg-white rounded-lg p-2 sm:p-4 shadow-sm border border-blue-200">
                                 <p class="text-gray-600 text-xs mb-2">Biaya Pendaftaran</p>
-                                <p class="font-bold text-primary text-lg">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
+                                <p class="font-bold text-primary text-base sm:text-lg truncate">${formatRupiah(student.uang_pendaftaran || 40000)}</p>
                             </div>
-                            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+                            <div class="bg-white rounded-lg p-2 sm:p-4 shadow-sm border border-blue-200">
                                 <p class="text-gray-600 text-xs mb-2">Tanggal Pembayaran</p>
-                                <p class="font-bold text-darkblue">${student.tanggal_pembayaran || '-'}</p>
+                                <p class="font-bold text-darkblue text-xs sm:text-base">${student.tanggal_pembayaran || '-'}</p>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-primary mr-1"></i>
-                            <strong>Metode Pembayaran:</strong> ${student.metode_pembayaran || 'Bank Transfer'}
+                        <p class="text-xs sm:text-sm text-gray-600 mb-4"><i class="fas fa-info-circle text-primary mr-1 flex-shrink-0"></i>
+                            <span><strong>Metode Pembayaran:</strong> ${student.metode_pembayaran || 'Bank Transfer'}</span>
                         </p>
                     </div>
 
                     <!-- SPP Bulanan -->
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-300 rounded-lg p-4 mb-6">
-                        <h3 class="text-lg font-bold text-darkblue mb-3 flex items-center gap-2">
-                            <i class="fas fa-calendar-check text-success"></i>SPP Bulanan
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-300 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-lg font-bold text-darkblue mb-3 flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-success flex-shrink-0"></i>SPP Bulanan
                         </h3>
-                        <div class="bg-white rounded-lg p-4 mb-3 border border-green-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-gray-600 font-semibold">Biaya SPP per Bulan:</span>
-                                <span class="text-2xl font-bold text-success">${formatRupiah(student.uang_spp || 160000)}</span>
+                        <div class="bg-white rounded-lg p-3 sm:p-4 mb-3 border border-green-200">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
+                                <span class="text-gray-600 font-semibold text-xs sm:text-base">Biaya SPP per Bulan:</span>
+                                <span class="text-xl sm:text-2xl font-bold text-success">${formatRupiah(student.uang_spp || 160000)}</span>
                             </div>
-                            <p class="text-sm text-gray-600"><i class="fas fa-check text-success mr-1"></i>Sudah termasuk uang kolam</p>
-                            <p class="text-sm text-gray-600"><i class="fas fa-check text-success mr-1"></i>1x latihan per minggu (4x per bulan)</p>
+                            <p class="text-xs sm:text-sm text-gray-600"><i class="fas fa-check text-success mr-1 flex-shrink-0"></i>Sudah termasuk uang kolam</p>
+                            <p class="text-xs sm:text-sm text-gray-600"><i class="fas fa-check text-success mr-1 flex-shrink-0"></i>1x latihan per minggu (4x per bulan)</p>
                         </div>
                     </div>
 
                     <!-- SPP Tagihan Section -->
-                    <div class="mt-6 pt-6 border-t border-blue-200">
-                        <h3 class="text-lg font-bold text-darkblue mb-4 flex items-center gap-2">
-                            <i class="fas fa-file-invoice text-accent"></i>Tagihan SPP
+                    <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-blue-200">
+                        <h3 class="text-base sm:text-lg font-bold text-darkblue mb-3 sm:mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-invoice text-accent flex-shrink-0"></i>Tagihan SPP
                         </h3>
                         <div id="sppInvoiceContainer"></div>
                     </div>
@@ -431,16 +431,16 @@
 
             if (usedFallbackRegistrationDate) {
                 invoiceHTML += `
-                    <div class="p-3 mb-2 rounded bg-yellow-50 border border-yellow-200 text-sm text-yellow-800">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Tanggal pendaftaran tidak valid atau kosong; menggunakan tanggal saat ini untuk menghitung SPP.
+                    <div class="p-3 mb-2 rounded bg-yellow-50 border border-yellow-200 text-xs sm:text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2 flex-shrink-0"></i><span>Tanggal pendaftaran tidak valid atau kosong; menggunakan tanggal saat ini untuk menghitung SPP.</span>
                     </div>
                 `;
             }
 
             if (TEST_CURRENT_DATE) {
                 invoiceHTML += `
-                    <div class="p-3 mb-2 rounded bg-blue-50 border border-blue-300 text-sm text-blue-800">
-                        <i class="fas fa-flask-vial mr-2"></i><strong>MODE TESTING:</strong> Menggunakan tanggal: <code class="bg-blue-100 px-2 py-1 rounded">${currentDate.toLocaleDateString('id-ID')}</code>
+                    <div class="p-3 mb-2 rounded bg-blue-50 border border-blue-300 text-xs sm:text-sm text-blue-800">
+                        <i class="fas fa-flask-vial mr-2 flex-shrink-0"></i><strong>MODE TESTING:</strong> Menggunakan tanggal: <code class="bg-blue-100 px-2 py-1 rounded text-xs">${currentDate.toLocaleDateString('id-ID')}</code>
                     </div>
                 `;
             }
@@ -513,14 +513,14 @@
                 badgeText = '⚠️ JATUH TEMPO!';
                 badgeIcon = 'fa-exclamation-circle';
                 warningHTML = `
-                    <div class="mb-4 p-4 bg-red-50 border-2 border-red-400 rounded-lg animate-pulse">
-                        <div class="flex items-center gap-3">
-                            <div class="text-red-600 text-3xl">
+                    <div class="mb-4 p-3 sm:p-4 bg-red-50 border-2 border-red-400 rounded-lg animate-pulse">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                            <div class="text-red-600 text-2xl sm:text-3xl flex-shrink-0">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                             <div>
-                                <p class="text-red-800 font-bold text-lg">TAGIHAN SPP JATUH TEMPO!</p>
-                                <p class="text-red-700 text-sm mt-1">
+                                <p class="text-red-800 font-bold text-base sm:text-lg">TAGIHAN SPP JATUH TEMPO!</p>
+                                <p class="text-red-700 text-xs sm:text-sm mt-1">
                                     Pembayaran SPP bulan <strong>${monthName}</strong> sudah melewati tanggal jatuh tempo. 
                                     <strong>Silakan segera lakukan pembayaran.</strong>
                                 </p>
@@ -534,9 +534,9 @@
                 badgeText = '⏰ ' + daysRemaining + ' hari lagi';
                 badgeIcon = 'fa-calendar-alt';
                 warningHTML = `
-                    <div class="mb-4 p-4 bg-orange-50 border-l-4 border-orange-400 rounded">
-                        <p class="text-orange-800 font-semibold">
-                            <i class="fas fa-bell mr-2"></i>Perhatian: Tagihan jatuh tempo dalam ${daysRemaining} hari!
+                    <div class="mb-4 p-3 sm:p-4 bg-orange-50 border-l-4 border-orange-400 rounded">
+                        <p class="text-orange-800 font-semibold text-xs sm:text-base">
+                            <i class="fas fa-bell mr-2 flex-shrink-0"></i><span>Perhatian: Tagihan jatuh tempo dalam ${daysRemaining} hari!</span>
                         </p>
                     </div>
                 `;
@@ -553,22 +553,22 @@
                 const escapedNama = student.nama.replace(/'/g, "\\'");
                 const monthIso = inv.month.getFullYear() + '-' + ('0'+(inv.month.getMonth()+1)).slice(-2);
                 payButtonHTML = `
-                    <div class="mt-4 text-right">
+                    <div class="mt-4 text-center sm:text-right">
                         <button onclick="goToPaymentSPP(${student.id}, '${escapedNama}', '${monthIso}', ${inv.amount})" 
-                            class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 rounded-lg font-bold shadow-lg transform transition hover:scale-105 hover:shadow-xl flex items-center gap-2 ml-auto animate-bounce">
-                            <i class="fas fa-credit-card text-lg"></i>
-                            <span class="text-base">BAYAR SEKARANG</span>
+                            class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 sm:px-8 py-3 min-h-[44px] rounded-lg font-bold shadow-lg transform transition hover:scale-105 hover:shadow-xl flex items-center justify-center sm:justify-end gap-2 w-full sm:w-auto animate-bounce text-sm sm:text-base">
+                            <i class="fas fa-credit-card text-lg flex-shrink-0"></i>
+                            <span>BAYAR SEKARANG</span>
                         </button>
                     </div>
                 `;
             } else if (hasOverdueInvoices) {
                 // ADA TAGIHAN JATUH TEMPO LAIN - Tombol disabled
                 payButtonHTML = `
-                    <div class="mt-4 text-right">
+                    <div class="mt-4 text-center sm:text-right">
                         <button disabled 
-                            class="bg-gray-400 text-gray-100 px-8 py-4 rounded-lg font-bold opacity-60 cursor-not-allowed flex items-center gap-2 ml-auto" 
+                            class="bg-gray-400 text-gray-100 px-6 sm:px-8 py-3 min-h-[44px] rounded-lg font-bold opacity-60 cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-base" 
                             title="Selesaikan tagihan jatuh tempo terlebih dahulu">
-                            <i class="fas fa-lock"></i>
+                            <i class="fas fa-lock flex-shrink-0"></i>
                             <span>Disabled - Ada Tagihan Jatuh Tempo</span>
                         </button>
                     </div>
@@ -578,11 +578,11 @@
                 const escapedNama = student.nama.replace(/'/g, "\\'");
                 const monthIso = inv.month.getFullYear() + '-' + ('0'+(inv.month.getMonth()+1)).slice(-2);
                 payButtonHTML = `
-                    <div class="mt-4 text-right">
+                    <div class="mt-4 text-center sm:text-right">
                         <button onclick="goToPaymentSPP(${student.id}, '${escapedNama}', '${monthIso}', ${inv.amount})" 
-                            class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2 ml-auto">
-                            <i class="fas fa-credit-card text-lg"></i>
-                            <span class="text-base">Bayar Sekarang</span>
+                            class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-6 sm:px-8 py-3 min-h-[44px] rounded-lg font-bold shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto text-sm sm:text-base">
+                            <i class="fas fa-credit-card text-lg flex-shrink-0"></i>
+                            <span>Bayar Sekarang</span>
                         </button>
                     </div>
                 `;
@@ -590,22 +590,22 @@
 
             let invoiceHTML = `
                 ${warningHTML}
-                <div class="${invoiceClass} rounded-lg p-6 hover:shadow-lg transition card-hover">
-                    <div class="flex justify-between items-start gap-4 mb-4">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-darkblue mb-2 text-lg">
-                                <i class="fas fa-receipt mr-2"></i>Tagihan SPP ${monthName}
+                <div class="${invoiceClass} rounded-lg p-3 sm:p-6 hover:shadow-lg transition card-hover">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-darkblue mb-2 text-base sm:text-lg">
+                                <i class="fas fa-receipt mr-2 flex-shrink-0"></i><span class="truncate">Tagihan SPP ${monthName}</span>
                             </h4>
-                            <p class="text-sm text-gray-700">
-                                <i class="fas fa-calendar-alt mr-2"></i>Jatuh Tempo: <span class="font-bold text-red-600">${inv.dueDate.toLocaleDateString('id-ID')}</span>
+                            <p class="text-xs sm:text-sm text-gray-700">
+                                <i class="fas fa-calendar-alt mr-2 flex-shrink-0"></i>Jatuh Tempo: <span class="font-bold text-red-600">${inv.dueDate.toLocaleDateString('id-ID')}</span>
                             </p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-3xl font-bold ${isOverdue ? 'text-red-700' : 'text-primary'} mb-3">
+                        <div class="text-left sm:text-right">
+                            <p class="text-2xl sm:text-3xl font-bold ${isOverdue ? 'text-red-700' : 'text-primary'} mb-3 truncate">
                                 ${formatRupiah(inv.amount)}
                             </p>
-                            <span class="inline-block px-4 py-2 rounded-full text-sm font-bold ${badgeClass} border-2">
-                                <i class="fas ${badgeIcon} mr-2"></i>${badgeText}
+                            <span class="inline-block px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold ${badgeClass} border-2">
+                                <i class="fas ${badgeIcon} mr-2 flex-shrink-0"></i><span class="hidden sm:inline">${badgeText}</span><span class="sm:hidden">${badgeText.replace(/⚠️ |✓ |⏰ |📅 /g, '')}</span>
                             </span>
                         </div>
                     </div>
@@ -615,11 +615,10 @@
             `;
             
             container.innerHTML = invoiceHTML + `
-                <div class="mt-6 p-4 bg-blue-50 border-l-4 border-primary rounded">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>Panduan Pembayaran:</strong> Klik tombol "BAYAR SEKARANG" di atas untuk melanjutkan ke form pembayaran SPP. 
-                        Anda dapat membayar melalui transfer bank sesuai instruksi di halaman pembayaran.
+                <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border-l-4 border-primary rounded">
+                    <p class="text-xs sm:text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2 flex-shrink-0"></i>
+                        <span><strong>Panduan Pembayaran:</strong> Klik tombol "BAYAR SEKARANG" di atas untuk melanjutkan ke form pembayaran SPP. Anda dapat membayar melalui transfer bank sesuai instruksi di halaman pembayaran.</span>
                     </p>
                 </div>
             `;

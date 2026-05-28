@@ -18,6 +18,12 @@ class DateTimeEncoder(json.JSONEncoder):
 
 def getDatabase():
     try:
+        # conn = mysql.connector.connect(
+        #     host="localhost",
+        #     user="root",
+        #     password="12345678",
+        #     database="sibahah",
+        # )
         conn = mysql.connector.connect(
             host="mysql-vmzh.railway.internal",
             user="root",
