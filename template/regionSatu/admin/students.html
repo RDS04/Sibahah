@@ -35,13 +35,17 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #F3F6F9;
+        html, body {
+            width: 100%;
             overflow-x: hidden;
         }
 
-        /* Sidebar transition */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+        }
+
+        /* Sidebar transition - mobile optimized */
         .sidebar {
             transition: transform 0.3s ease-in-out;
             z-index: 40;
@@ -51,13 +55,21 @@
             transform: translateX(-100%);
         }
 
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed;
+                width: 80vw !important;
+                max-width: 280px;
+            }
+        }
+
         @media (min-width: 768px) {
             .sidebar {
                 transform: translateX(0) !important;
             }
 
             .mobile-menu-btn {
-                display: none;
+                display: none !important;
             }
         }
 
@@ -70,6 +82,76 @@
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: 600;
+            min-height: 24px;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        /* Table wrapper responsive */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 640px) {
+            .table-wrapper {
+                border-radius: 0.5rem;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            table th, table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Modal responsive */
+        .modal {
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                padding: 2rem;
+            }
+        }
+
+        /* Fix layout on mobile */
+        @media (max-width: 767px) {
+            .md\:ml-72 {
+                margin-left: 0;
+            }
+
+            header {
+                padding: 0.75rem 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Touch-friendly sizes */
+        button, a.btn {
+            min-height: 44px;
+        }
+
+        /* Prevent iOS zoom */
+        input, select, textarea {
+            font-size: 16px;
         }
     </style>
 </head>
@@ -79,29 +161,29 @@
 
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
-        <div class="p-5 border-b border-white/20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
-                    <i class="fas fa-water text-white text-md"></i>
+        <div class="p-4 sm:p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="bg-primary w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                    <i class="fas fa-water text-white text-sm sm:text-md"></i>
                 </div>
-                <div>
-                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                <div class="min-w-0">
+                    <h1 class="text-white font-bold text-sm sm:text-lg truncate">Sibahah<span class="text-secondary">|Admin</span></h1>
                     <p class="text-white/50 text-xs">Sekolah Renang</p>
                 </div>
             </div>
-            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
-                <i class="fas fa-times text-xl"></i>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden flex-shrink-0">
+                <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
         </div>
 
-        <nav class="py-6 px-4">
+        <nav class="py-4 sm:py-6 px-3 sm:px-4">
             <div class="mb-6">
-                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
-                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
+                <p class="text-white/40 text-xs uppercase tracking-wider px-2 sm:px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" onclick="closeSidebar()" class="nav-link flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 text-sm sm:text-base" data-page="dashboard">
                     <i class="fas fa-tachometer-alt w-5"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="students">
+                <a href="/admin/students" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="students">
                     <i class="fas fa-users w-5"></i>
                     <span>Data Siswa</span>
                 </a>
@@ -109,17 +191,17 @@
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
                 </a> -->
-                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
+                <a href="/admin/payments" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
                 </a>
-                   <a href="/admin/spp-payments"
+                <a href="/admin/spp-payments" onclick="closeSidebar()"
                     class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
                     data-page="spp-payments">
                     <i class="fas fa-receipt w-5"></i>
                     <span>Pembayaran SPP</span>
                 </a>
-                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
+                <a href="/admin/schedule" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Jadwal Latihan</span>
                 </a>

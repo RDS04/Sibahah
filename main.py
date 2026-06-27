@@ -24,6 +24,36 @@ def getDatabase():
         database="sekolah_renang_sibahah"
     )
 
+def ensure_spp_payments_table():
+    """Pastikan tabel spp_payments sudah ada"""
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor()
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS spp_payments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            pendaftaran_id INT NULL,
+            siswa_id VARCHAR(100) NULL,
+            payment_month VARCHAR(20) NULL,
+            amount DECIMAL(12,2) NULL,
+            nama_pengirim VARCHAR(255) NULL,
+            nomor_rekening_pengirim VARCHAR(100) NULL,
+            catatan TEXT NULL,
+            bukti_transfer LONGTEXT NULL,
+            tanggal_pembayaran DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (pendaftaran_id) REFERENCES pendaftaran(id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """
+        cursor.execute(create_table_sql)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("[STARTUP] ✓ Tabel spp_payments sudah siap")
+        return True
+    except Exception as e:
+        print(f"[STARTUP] ✗ Error creating spp_payments table: {e}")
+        return False
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -51,8 +81,8 @@ except:
     app.json_encoder = DateTimeEncoder  # Flask < 2.0
 
 
-# Panggil saat startup
-# ensure_admin_table()
+# Panggil saat startup untuk ensure table spp_payments exists
+ensure_spp_payments_table()
 
 @app.route('/')
 def landingPage():
@@ -344,7 +374,13 @@ def payment():
         cursor.execute(query_spp, values_spp)
         affected_rows_2 = cursor.rowcount
         spp_payment_id = cursor.lastrowid
-        print(f"[PAYMENT] SPP payment inserted, affected rows: {affected_rows_2}, SPP ID: {spp_payment_id}")
+        print(f"[PAYMENT] SPP payment inserted successfully!")
+        print(f"  - SPP ID: {spp_payment_id}")
+        print(f"  - Affected rows: {affected_rows_2}")
+        print(f"  - Siswa ID: {siswa_id}")
+        print(f"  - Payment Month: {payment_month}")
+        print(f"  - Amount: Rp {biaya_spp:,}")
+        print(f"  - Nama Pengirim: {nama_siswa}")
         
         conn.commit()
         
@@ -352,8 +388,8 @@ def payment():
         conn.close()
         
         print(f"[PAYMENT] SUCCESS: Data split and saved to 2 databases:")
-        print(f"  - Pendaftaran: Rp {biaya_pendaftaran:,}")
-        print(f"  - SPP: Rp {biaya_spp:,}")
+        print(f"  - Pendaftaran table: Rp {biaya_pendaftaran:,}")
+        print(f"  - SPP_payments table: Rp {biaya_spp:,}")
         print(f"  - Total: Rp {biaya_pendaftaran + biaya_spp:,}")
         
         # Clear session
@@ -609,16 +645,11 @@ def api_stats():
         cursor.execute("SELECT COUNT(*) as total FROM pendaftaran WHERE status_pembayaran = 'BELUM_BAYAR'")
         total_pending = cursor.fetchone()['total'] or 0
         
-        # Total pendapatan (ambil dari database)
-        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
-        biaya = cursor.fetchone()
-        uang_pendaftaran = biaya['uang_pendaftaran'] if biaya else 40000
-        uang_spp = biaya['uang_spp'] if biaya else 160000
-        total_per_siswa = uang_pendaftaran + uang_spp
-        
-        cursor.execute("SELECT COUNT(*) as total FROM pendaftaran WHERE status_pembayaran = 'SUDAH_BAYAR'")
-        total_bayar = cursor.fetchone()['total'] or 0
-        total_pendapatan = total_bayar * total_per_siswa
+        # Total pendapatan pendaftaran - langsung sum dari total_biaya yang tersimpan di database
+        # total_biaya hanya berisi uang pendaftaran saja (40,000 per siswa)
+        cursor.execute("SELECT COALESCE(SUM(total_biaya), 0) as total FROM pendaftaran WHERE status_pembayaran = 'SUDAH_BAYAR'")
+        pendapatan_result = cursor.fetchone()
+        total_pendapatan = int(float(pendapatan_result['total'])) if pendapatan_result and pendapatan_result['total'] else 0
         
         # Total revenue SPP dari table spp_payments
         total_spp_revenue = 0
@@ -720,7 +751,7 @@ def api_payments():
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer
+               bukti_transfer, total_biaya
         FROM pendaftaran
         WHERE status_pembayaran = 'SUDAH_BAYAR'
         ORDER BY tanggal_pembayaran DESC
@@ -741,7 +772,9 @@ def api_payments():
                     payment['bukti_transfer'] = payment['bukti_transfer'].decode('utf-8')
             else:
                 payment['bukti_transfer'] = None
-            # Tambahkan nominal pembayaran
+            # Tambahkan nominal pembayaran - ambil dari database, bukan hitung ulang
+            # Saat pendaftaran + SPP dibayar sekaligus, total_biaya di DB = 40000
+            # Tapi client juga bayar SPP 160000, jadi nominal yang ditampilkan = total_nominal
             payment['uang_pendaftaran'] = uang_pendaftaran
             payment['uang_spp'] = uang_spp
             payment['nominal'] = total_nominal
@@ -782,7 +815,7 @@ def api_payments_pending():
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer
+               bukti_transfer, total_biaya
         FROM pendaftaran
         WHERE status_pembayaran != 'SUDAH_BAYAR'
         ORDER BY tanggal_daftar DESC
@@ -843,7 +876,7 @@ def api_payments_registration():
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer
+               bukti_transfer, total_biaya
         FROM pendaftaran
         WHERE status_pembayaran = 'SUDAH_BAYAR'
         ORDER BY tanggal_pembayaran DESC
@@ -863,10 +896,10 @@ def api_payments_registration():
                     payment['bukti_transfer'] = payment['bukti_transfer'].decode('utf-8')
             else:
                 payment['bukti_transfer'] = None
-            # Tambahkan nominal pembayaran
+            # Tambahkan nominal pembayaran - untuk registration gunakan total_biaya dari DB
             payment['uang_pendaftaran'] = uang_pendaftaran
             payment['uang_spp'] = uang_spp
-            payment['nominal'] = total_nominal
+            payment['nominal'] = payment.get('total_biaya') or uang_pendaftaran
         
         cursor.close()
         conn.close()
@@ -961,6 +994,8 @@ def api_spp_payments():
                     r['tanggal_pembayaran'] = r['tanggal_pembayaran'].strftime('%d-%m-%Y %H:%M')
                 except Exception:
                     pass
+            # Tambahkan nominal pembayaran
+            r['nominal'] = r.get('amount') or 160000
             # bukti_transfer dibiarkan sebagai base64 string (atau NULL)
 
         cursor.close()

@@ -35,13 +35,17 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #F3F6F9;
+        html, body {
+            width: 100%;
             overflow-x: hidden;
         }
 
-        /* Sidebar transition */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #F3F6F9;
+        }
+
+        /* Sidebar transition - mobile optimized */
         .sidebar {
             transition: transform 0.3s ease-in-out;
             z-index: 40;
@@ -51,20 +55,132 @@
             transform: translateX(-100%);
         }
 
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed;
+                width: 80vw !important;
+                max-width: 280px;
+            }
+        }
+
         @media (min-width: 768px) {
             .sidebar {
                 transform: translateX(0) !important;
             }
 
             .mobile-menu-btn {
-                display: none;
+                display: none !important;
             }
         }
         
+        /* Responsive status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            min-height: 24px;
+            white-space: nowrap;
+        }
+
         .status-active { background: #D1FAE5; color: #059669; }
         .status-pending { background: #FEF3C7; color: #D97706; }
+        .status-waiting { background: #E0E7FF; color: #4338CA; }
+
         .table-row-hover:hover { background-color: #F0F9FF; }
-        .stat-card { border-radius: 12px; padding: 20px; color: white; }
+
+        .stat-card { 
+            border-radius: 12px; 
+            padding: 1rem;
+            color: white;
+        }
+
+        @media (min-width: 640px) {
+            .stat-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Responsive tables wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 640px) {
+            .table-wrapper {
+                border-radius: 0.5rem;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            table th, table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Tab buttons responsive */
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .tab-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Modal responsive */
+        .modal {
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                padding: 2rem;
+            }
+        }
+
+        /* Fix layout on mobile */
+        @media (max-width: 767px) {
+            .md\:ml-72 {
+                margin-left: 0;
+            }
+
+            header {
+                padding: 0.75rem 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            header {
+                padding: 1rem 1.5rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Touch-friendly button sizes */
+        button, a.btn {
+            min-height: 44px;
+        }
+
+        /* Prevent iOS zoom on input */
+        input, select, textarea {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -73,47 +189,47 @@
 
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-darkblue shadow-2xl z-40 overflow-y-auto">
-        <div class="p-5 border-b border-white/20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center shadow-md">
-                    <i class="fas fa-water text-white text-md"></i>
+        <div class="p-4 sm:p-5 border-b border-white/20 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="bg-primary w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                    <i class="fas fa-water text-white text-sm sm:text-md"></i>
                 </div>
-                <div>
-                    <h1 class="text-white font-bold text-lg">Sibahah<span class="text-secondary">|Admin</span></h1>
+                <div class="min-w-0">
+                    <h1 class="text-white font-bold text-sm sm:text-lg truncate">Sibahah<span class="text-secondary">|Admin</span></h1>
                     <p class="text-white/50 text-xs">Sekolah Renang</p>
                 </div>
             </div>
-            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden">
-                <i class="fas fa-times text-xl"></i>
+            <button onclick="closeSidebar()" class="text-white/70 hover:text-white md:hidden flex-shrink-0">
+                <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
         </div>
 
-        <nav class="py-6 px-4">
+        <nav class="py-4 sm:py-6 px-3 sm:px-4">
             <div class="mb-6">
-                <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Menu Utama</p>
-                <a href="/dashboard/admin" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="dashboard">
-                    <i class="fas fa-tachometer-alt w-5"></i>
+                <p class="text-white/40 text-xs uppercase tracking-wider px-2 sm:px-3 mb-3">Menu Utama</p>
+                <a href="/dashboard/admin" onclick="closeSidebar()" class="nav-link flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 text-sm sm:text-base" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt w-4 sm:w-5 flex-shrink-0"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="/admin/students" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="students">
-                    <i class="fas fa-users w-5"></i>
+                <a href="/admin/students" onclick="closeSidebar()" class="nav-link flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 text-sm sm:text-base" data-page="students">
+                    <i class="fas fa-users w-4 sm:w-5 flex-shrink-0"></i>
                     <span>Data Siswa</span>
                 </a>
                 <!-- <a href="/admin/registrations" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="registrations">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pendaftaran Baru</span>
                 </a> -->
-                <a href="/admin/payments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="payments">
+                <a href="/admin/payments" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1 bg-primary/30 text-white" data-page="payments">
                     <i class="fas fa-credit-card w-5"></i>
                     <span>Pembayaran</span>
                 </a>
-                   <a href="/admin/spp-payments"
+                <a href="/admin/spp-payments" onclick="closeSidebar()"
                     class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1"
                     data-page="spp-payments">
                     <i class="fas fa-receipt w-5"></i>
                     <span>Pembayaran SPP</span>
                 </a>
-                <a href="/admin/schedule" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
+                <a href="/admin/schedule" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="schedule">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Jadwal Latihan</span>
                 </a>
@@ -121,7 +237,7 @@
 
             <div class="mb-6">
                 <p class="text-white/40 text-xs uppercase tracking-wider px-3 mb-3">Lainnya</p>
-                <a href="/admin/settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="settings">
+                <a href="/admin/settings" onclick="closeSidebar()" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:bg-primary/30 hover:text-white transition-all mb-1" data-page="settings">
                     <i class="fas fa-cog w-5"></i>
                     <span>Pengaturan</span>
                 </a>
@@ -137,23 +253,23 @@
     <div class="md:ml-72 min-h-screen">
         <!-- Header Top -->
         <header class="bg-white shadow-sm sticky top-0 z-20">
-            <div class="flex items-center justify-between px-6 py-4">
-                <div class="flex items-center gap-4">
-                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-2xl md:hidden" onclick="toggleSidebar()">
+            <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 gap-2 sm:gap-4">
+                <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-lg sm:text-2xl md:hidden flex-shrink-0" onclick="toggleSidebar()">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h2 class="text-xl font-semibold text-darkblue" id="pageTitle">Manajemen Pembayaran</h2>
+                    <h2 class="text-base sm:text-xl font-semibold text-darkblue truncate" id="pageTitle">Pembayaran</h2>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                     <div class="relative">
-                        <i class="fas fa-bell text-gray-500 text-xl cursor-pointer hover:text-primary"></i>
-                        <span class="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full px-1.5 py-0.5">0</span>
+                        <i class="fas fa-bell text-gray-500 text-base sm:text-xl cursor-pointer hover:text-primary"></i>
+                        <span class="absolute -top-1 -right-2 bg-danger text-white text-[10px] rounded-full px-1.5 py-0.5 min-w-fit">0</span>
                     </div>
-                    <div class="flex items-center gap-3 border-l pl-4">
-                        <div class="bg-primary w-9 h-9 rounded-full flex items-center justify-center text-white font-bold">A</div>
-                        <div class="hidden sm:block">
-                            <p class="text-sm font-semibold text-gray-700">Admin Sibahah</p>
-                            <p class="text-xs text-gray-400">Super Admin</p>
+                    <div class="flex items-center gap-2 sm:gap-3 border-l pl-2 sm:pl-4">
+                        <div class="bg-primary w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">A</div>
+                        <div class="hidden sm:block min-w-0">
+                            <p class="text-xs sm:text-sm font-semibold text-gray-700 truncate">Admin Sibahah</p>
+                            <p class="text-xs text-gray-400 truncate">Super Admin</p>
                         </div>
                     </div>
                 </div>
@@ -161,37 +277,37 @@
         </header>
 
         <!-- Page Content -->
-        <main class="p-6">
+        <main class="p-3 sm:p-6">
             <div class="max-w-7xl mx-auto">
-                <p class="text-gray-600 mt-1">Kelola pembayaran SPP dan pendaftaran siswa</p>      </div>
+                <p class="text-gray-600 mt-1 text-xs sm:text-sm">Kelola pembayaran SPP dan pendaftaran siswa</p>      </div>
 
             <!-- Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="stat-card bg-green-600">
-                    <p class="text-sm opacity-90">Total Lunas</p>
-                    <h3 class="text-2xl font-bold" id="totalLunas">0</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                <div class="stat-card bg-green-600 text-sm sm:text-base">
+                    <p class="text-xs sm:text-sm opacity-90">Total Lunas</p>
+                    <h3 class="text-lg sm:text-2xl font-bold" id="totalLunas">0</h3>
                 </div>
-                <div class="stat-card bg-yellow-600">
-                    <p class="text-sm opacity-90">Total Pending</p>
-                    <h3 class="text-2xl font-bold" id="totalPending">0</h3>
+                <div class="stat-card bg-yellow-600 text-sm sm:text-base">
+                    <p class="text-xs sm:text-sm opacity-90">Total Pending</p>
+                    <h3 class="text-lg sm:text-2xl font-bold" id="totalPending">0</h3>
                 </div>
-                <div class="stat-card bg-blue-600">
-                    <p class="text-sm opacity-90">Total Pendapatan</p>
-                    <h3 class="text-2xl font-bold" id="totalRevenue">Rp 0</h3>
+                <div class="stat-card bg-blue-600 text-sm sm:text-base">
+                    <p class="text-xs sm:text-sm opacity-90">Total Pendapatan</p>
+                    <h3 class="text-sm sm:text-2xl font-bold truncate" id="totalRevenue">Rp 0</h3>
                 </div>
-                <div class="stat-card bg-purple-600">
-                    <p class="text-sm opacity-90">Bulan Ini</p>
-                    <h3 class="text-2xl font-bold" id="monthRevenue">Rp 0</h3>
+                <div class="stat-card bg-purple-600 text-sm sm:text-base">
+                    <p class="text-xs sm:text-sm opacity-90">Bulan Ini</p>
+                    <h3 class="text-sm sm:text-2xl font-bold truncate" id="monthRevenue">Rp 0</h3>
                 </div>
             </div>
 
             <!-- Filter & Tabs -->
-            <div class="mb-6">
-                <div class="flex gap-3 flex-wrap mb-4">
-                    <button onclick="showTab('lunas')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 tab-btn" id="tabLunas">
-                        <i class="fas fa-check-circle"></i> Pembayaran Lunas
+            <div class="mb-4 sm:mb-6">
+                <div class="flex gap-2 sm:gap-3 flex-wrap mb-4 overflow-x-auto pb-2">
+                    <button onclick="showTab('lunas')" class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm hover:bg-blue-700 tab-btn whitespace-nowrap flex-shrink-0" id="tabLunas">
+                        <i class="fas fa-check-circle"></i> Lunas
                     </button>
-                    <button onclick="showTab('pending')" class="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700 tab-btn" id="tabPending">
+                    <button onclick="showTab('pending')" class="px-3 sm:px-4 py-2 bg-yellow-600 text-white rounded-lg text-xs sm:text-sm hover:bg-yellow-700 tab-btn whitespace-nowrap flex-shrink-0" id="tabPending">
                         <i class="fas fa-clock"></i> Pembayaran Pending
                     </button>
                     <button onclick="showTab('registration')" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 tab-btn" id="tabRegistration">
@@ -207,21 +323,21 @@
             </div>
 
             <!-- Tabel Pembayaran Lunas -->
-            <div id="tabelLunas" class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="p-4 bg-gray-50 border-b">
-                    <h3 class="font-semibold text-gray-800">Pembayaran Lunas</h3>
+            <div id="tabelLunas" class="bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden">
+                <div class="p-3 sm:p-4 bg-gray-50 border-b">
+                    <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Pembayaran Lunas</h3>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="table-wrapper">
                     <table class="w-full">
                         <thead class="bg-gray-100 border-b">
                             <tr>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">No</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nama Siswa</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Bulan</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nominal</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Metode</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Tanggal Bayar</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">No</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Nama Siswa</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Bulan</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Nominal</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Metode</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Status</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Tanggal Bayar</th>
                                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                             </tr>
                         </thead>
@@ -354,12 +470,22 @@
         function updateStatistics() {
             const lunas = paymentsDataLunas.length;
             const pending = paymentsDataPending.length;
-            const totalRevenue = paymentsDataLunas.reduce((sum, p) => sum + (p.nominal || 0), 0);
+            
+            // Hitung total revenue dari nominal yang ada di data
+            let totalRevenue = 0;
+            if (paymentsDataLunas && paymentsDataLunas.length > 0) {
+                totalRevenue = paymentsDataLunas.reduce((sum, p) => {
+                    const nominalValue = p.nominal || p.total_biaya || 0;
+                    return sum + (Number(nominalValue) || 0);
+                }, 0);
+            }
             
             // Format untuk total revenue dengan koma pemisah ribuan
             const totalRevenueFormatted = `Rp ${formatRupiah(totalRevenue)}`;
             const monthRevenueFormatted = `Rp ${formatRupiah(totalRevenue)}`;
 
+            console.log(`[STATS] Lunas: ${lunas}, Pending: ${pending}, Total Revenue: ${totalRevenue}`);
+            
             document.getElementById('totalLunas').innerText = lunas;
             document.getElementById('totalPending').innerText = pending;
             document.getElementById('totalRevenue').innerText = totalRevenueFormatted;
@@ -381,12 +507,14 @@
                 return;
             }
 
-            tbody.innerHTML = paymentsDataLunas.map((p, idx) => `
+            tbody.innerHTML = paymentsDataLunas.map((p, idx) => {
+                const nominalValue = p.nominal || p.total_biaya || 0;
+                return `
                 <tr class="table-row-hover border-b hover:bg-gray-50 transition">
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">Januari 2025</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(nominalValue)}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.metode_pembayaran || 'Bank Transfer'}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
@@ -398,7 +526,8 @@
                         <button onclick="viewReceipt(${p.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs">Detail</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function renderPendingTable() {
@@ -409,12 +538,14 @@
                 return;
             }
 
-            tbody.innerHTML = paymentsDataPending.map((p, idx) => `
+            tbody.innerHTML = paymentsDataPending.map((p, idx) => {
+                const nominalValue = p.nominal || p.total_biaya || 200000;
+                return `
                 <tr class="table-row-hover border-b hover:bg-gray-50 transition">
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(nominalValue)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                             ⏳ Menunggu
@@ -425,7 +556,8 @@
                         <button onclick="viewRegistration(${p.id})" class="text-yellow-600 hover:text-yellow-800 font-medium text-xs">Lihat Bukti</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function renderRegistrationTable() {
@@ -436,12 +568,14 @@
                 return;
             }
 
-            tbody.innerHTML = paymentsDataRegistration.map((p, idx) => `
+            tbody.innerHTML = paymentsDataRegistration.map((p, idx) => {
+                const nominalValue = p.nominal || p.total_biaya || 40000;
+                return `
                 <tr class="table-row-hover border-b hover:bg-gray-50 transition">
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(nominalValue)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
                             ✓ Lunas
@@ -452,7 +586,8 @@
                         <button onclick="viewReceipt(${p.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs">Detail</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function renderSppTable() {
@@ -463,12 +598,14 @@
                 return;
             }
 
-            tbody.innerHTML = paymentsDataSpp.map((p, idx) => `
+            tbody.innerHTML = paymentsDataSpp.map((p, idx) => {
+                const nominalValue = p.nominal || p.amount || 160000;
+                return `
                 <tr class="table-row-hover border-b hover:bg-gray-50 transition">
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(nominalValue)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
                             ✓ Lunas
@@ -479,7 +616,8 @@
                         <button onclick="viewReceipt(${p.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs">Detail</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function showTab(tab) {
