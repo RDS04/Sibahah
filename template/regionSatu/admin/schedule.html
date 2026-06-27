@@ -244,18 +244,79 @@
         </div>
     </div>
 
+    <!-- Modal Edit Jadwal -->
+    <div id="editScheduleModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6">
+            <h2 class="text-xl font-bold mb-4">Edit Jadwal</h2>
+            <div class="space-y-3">
+                <input type="text" placeholder="Hari" id="editDay" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" placeholder="Jam (08:00 - 09:00)" id="editTime" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" placeholder="Kelas" id="editClass" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="editType" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    <option value="">Pilih Jenis</option>
+                    <option value="Putra">Putra</option>
+                    <option value="Putri">Putri</option>
+                </select>
+                <input type="text" placeholder="Instruktur" id="editInstructor" class="w-full px-3 py-2 border rounded-lg text-sm">
+            </div>
+            <div class="flex gap-3 mt-6 justify-end">
+                <button onclick="closeEditScheduleModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Batal</button>
+                <button onclick="saveEditSchedule()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let schedulesData = [
-            { id: 1, hari: "Selasa", jam: "17:00 - 18:00", kelas: "Pemula", jenis: "Putra", peserta: 8, instruktur:"Coach Fikri" },
-            { id: 2, hari: "Jumat", jam: "15:00 - 16:00", kelas: "Pemula", jenis: "Putra", peserta: 7, instruktur: "Coach Fikri" },
-            { id: 3, hari: "Sabtu", jam: "09:00 - 10:00", kelas: "Pemula", jenis: "Putra", peserta: 6, instruktur: "Coach Fikri" },
-            { id: 4, hari: "Sabtu", jam: "15:00 - 16:00", kelas: "Lanjutan", jenis: "Putra", peserta: 5, instruktur: "Coach Fikri" },
-            
-            { id: 5, hari: "Selasa", jam: "16:00 - 17:00", kelas: "Pemula", jenis: "Putri", peserta: 9, instruktur: "Coach Fikri" },
-            { id: 6, hari: "Jumat", jam: "14:00 - 15:00", kelas: "Pemula", jenis: "Putri", peserta: 10, instruktur: "Coach Fikri" },
-            { id: 7, hari: "Sabtu", jam: "08:00 - 09:00", kelas: "Pemula", jenis: "Putri", peserta: 8, instruktur: "Coach Fikri" },
-            { id: 8, hari: "Sabtu", jam: "14:00 - 15:00", kelas: "Lanjutan", jenis: "Putri", peserta: 6, instruktur: "Coach Fikri" },
-        ];
+        let schedulesData = [];
+        let currentEditId = null;
+
+        // Format Rupiah dengan koma
+        function formatRupiah(number) {
+            if (!number) return '0';
+            return Math.round(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        async function loadSchedules() {
+            try {
+                console.log('[SCHEDULE] Loading jadwal from /api/jadwal...');
+                const response = await fetch('/api/jadwal');
+                
+                console.log('[SCHEDULE] Response status:', response.status);
+                console.log('[SCHEDULE] Response type:', response.headers.get('content-type'));
+                
+                // Jika 401 Unauthorized, redirect ke login
+                if (response.status === 401) {
+                    console.error('[SCHEDULE] 401 Unauthorized - redirecting to login');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+                
+                // Jika status bukan 200, log error
+                if (!response.ok) {
+                    console.error('[SCHEDULE] HTTP Error:', response.status, response.statusText);
+                    const text = await response.text();
+                    console.error('[SCHEDULE] Response body:', text.substring(0, 200));
+                    alert('Error: ' + response.statusText);
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('[SCHEDULE] Response JSON:', result);
+                
+                if (result.success) {
+                    schedulesData = result.data;
+                    console.log('[SCHEDULE] Loaded', schedulesData.length, 'schedules');
+                    renderScheduleCards();
+                    renderScheduleTable();
+                } else {
+                    console.error('[SCHEDULE] API returned error:', result.message);
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('[SCHEDULE] Fetch error:', error);
+                alert('Gagal memuat jadwal: ' + error.message);
+            }
+        }
 
         function renderScheduleCards() {
             const putraContainer = document.getElementById('putraSchedule');
@@ -268,7 +329,7 @@
                 <div class="schedule-card schedule-putra">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam}</h4>
+                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam_mulai} - ${s.jam_selesai}</h4>
                             <p class="text-sm text-gray-600">Kelas ${s.kelas}</p>
                         </div>
                         <button onclick="deleteSchedule(${s.id})" class="text-red-500 hover:text-red-700">
@@ -276,8 +337,8 @@
                         </button>
                     </div>
                     <div class="flex gap-4 text-sm text-gray-700 mt-3">
-                        <div><i class="fas fa-users text-blue-600 mr-1"></i>${s.peserta} siswa</div>
-                        <div><i class="fas fa-user-tie text-blue-600 mr-1"></i>${s.instruktur}</div>
+                        <div><i class="fas fa-users text-blue-600 mr-1"></i>${s.peserta || 0} siswa</div>
+                        <div><i class="fas fa-user-tie text-blue-600 mr-1"></i>${s.instruktur || 'TBA'}</div>
                     </div>
                 </div>
             `).join('');
@@ -286,7 +347,7 @@
                 <div class="schedule-card schedule-putri">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam}</h4>
+                            <h4 class="font-bold text-gray-900">${s.hari} | ${s.jam_mulai} - ${s.jam_selesai}</h4>
                             <p class="text-sm text-gray-600">Kelas ${s.kelas}</p>
                         </div>
                         <button onclick="deleteSchedule(${s.id})" class="text-red-500 hover:text-red-700">
@@ -294,8 +355,8 @@
                         </button>
                     </div>
                     <div class="flex gap-4 text-sm text-gray-700 mt-3">
-                        <div><i class="fas fa-users text-orange-600 mr-1"></i>${s.peserta} siswa</div>
-                        <div><i class="fas fa-user-tie text-orange-600 mr-1"></i>${s.instruktur}</div>
+                        <div><i class="fas fa-users text-orange-600 mr-1"></i>${s.peserta || 0} siswa</div>
+                        <div><i class="fas fa-user-tie text-orange-600 mr-1"></i>${s.instruktur || 'TBA'}</div>
                     </div>
                 </div>
             `).join('');
@@ -306,15 +367,15 @@
             tbody.innerHTML = schedulesData.map(s => `
                 <tr class="border-b hover:bg-gray-50 transition">
                     <td class="px-6 py-3 font-medium text-gray-900">${s.hari}</td>
-                    <td class="px-6 py-3 text-sm text-gray-700">${s.jam}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.jam_mulai} - ${s.jam_selesai}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${s.kelas}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${s.jenis === 'Putra' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">
                             ${s.jenis}
                         </span>
                     </td>
-                    <td class="px-6 py-3 text-sm text-gray-700">${s.peserta}</td>
-                    <td class="px-6 py-3 text-sm text-gray-700">${s.instruktur}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.peserta || 0}/${s.kapasitas || 15}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700">${s.instruktur || 'TBA'}</td>
                     <td class="px-6 py-3 text-sm">
                         <button onclick="editSchedule(${s.id})" class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-2">Edit</button>
                         <button onclick="deleteSchedule(${s.id})" class="text-red-600 hover:text-red-800 font-medium text-xs">Hapus</button>
@@ -336,46 +397,179 @@
             document.getElementById('newInstructor').value = '';
         }
 
-        function addNewSchedule() {
+        function openEditScheduleModal() {
+            document.getElementById('editScheduleModal').classList.remove('hidden');
+        }
+
+        function closeEditScheduleModal() {
+            document.getElementById('editScheduleModal').classList.add('hidden');
+            document.getElementById('editDay').value = '';
+            document.getElementById('editTime').value = '';
+            document.getElementById('editClass').value = '';
+            document.getElementById('editType').value = '';
+            document.getElementById('editInstructor').value = '';
+            currentEditId = null;
+        }
+
+        async function addNewSchedule() {
             const day = document.getElementById('newDay').value.trim();
-            const time = document.getElementById('newTime').value.trim();
+            const timeInput = document.getElementById('newTime').value.trim();
             const kelas = document.getElementById('newClass').value.trim();
             const type = document.getElementById('newType').value;
             const instructor = document.getElementById('newInstructor').value.trim();
 
-            if (!day || !time || !kelas || !type || !instructor) {
+            if (!day || !timeInput || !kelas || !type || !instructor) {
                 alert('Semua field harus diisi!');
                 return;
             }
 
-            const newSchedule = {
-                id: Math.max(...schedulesData.map(s => s.id), 0) + 1,
-                hari: day,
-                jam: time,
-                kelas: kelas,
-                jenis: type,
-                peserta: 0,
-                instruktur: instructor
-            };
+            // Parse jam dari input (format: "08:00 - 09:00")
+            const timeParts = timeInput.split('-').map(t => t.trim());
+            if (timeParts.length !== 2) {
+                alert('Format jam salah! Gunakan format: HH:MM - HH:MM');
+                return;
+            }
 
-            schedulesData.push(newSchedule);
-            renderScheduleCards();
-            renderScheduleTable();
-            closeAddScheduleModal();
-            alert('✓ Jadwal berhasil ditambahkan!');
+            const jam_mulai = timeParts[0];
+            const jam_selesai = timeParts[1];
+
+            try {
+                const response = await fetch('/api/jadwal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        hari: day,
+                        jam_mulai: jam_mulai,
+                        jam_selesai: jam_selesai,
+                        kelas: kelas,
+                        jenis: type,
+                        instruktur: instructor
+                    })
+                });
+
+                // Jika 401 Unauthorized, redirect ke login
+                if (response.status === 401) {
+                    alert('Session telah expired. Silakan login kembali.');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    loadSchedules();
+                    closeAddScheduleModal();
+                    alert('✓ Jadwal berhasil ditambahkan!');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Gagal menambah jadwal: ' + error.message);
+            }
         }
 
-        function editSchedule(id) {
+        async function editSchedule(id) {
             const schedule = schedulesData.find(s => s.id === id);
-            alert(`Edit jadwal ${schedule.hari} ${schedule.jam} - Fitur edit siap diimplementasikan`);
+            if (!schedule) {
+                alert('Jadwal tidak ditemukan!');
+                return;
+            }
+            
+            // Populate form dengan data jadwal
+            currentEditId = id;
+            document.getElementById('editDay').value = schedule.hari;
+            document.getElementById('editTime').value = `${schedule.jam_mulai} - ${schedule.jam_selesai}`;
+            document.getElementById('editClass').value = schedule.kelas;
+            document.getElementById('editType').value = schedule.jenis;
+            document.getElementById('editInstructor').value = schedule.instruktur || '';
+            
+            // Buka modal edit
+            openEditScheduleModal();
         }
 
-        function deleteSchedule(id) {
-            if (confirm('Yakin ingin menghapus jadwal ini?')) {
-                schedulesData = schedulesData.filter(s => s.id !== id);
-                renderScheduleCards();
-                renderScheduleTable();
-                alert('✓ Jadwal telah dihapus!');
+        async function saveEditSchedule() {
+            if (!currentEditId) {
+                alert('Error: ID jadwal tidak ditemukan!');
+                return;
+            }
+
+            const day = document.getElementById('editDay').value.trim();
+            const timeInput = document.getElementById('editTime').value.trim();
+            const kelas = document.getElementById('editClass').value.trim();
+            const type = document.getElementById('editType').value;
+            const instructor = document.getElementById('editInstructor').value.trim();
+
+            if (!day || !timeInput || !kelas || !type) {
+                alert('Semua field harus diisi!');
+                return;
+            }
+
+            // Parse jam dari input (format: "08:00 - 09:00")
+            const timeParts = timeInput.split('-').map(t => t.trim());
+            if (timeParts.length !== 2) {
+                alert('Format jam salah! Gunakan format: HH:MM - HH:MM');
+                return;
+            }
+
+            const jam_mulai = timeParts[0];
+            const jam_selesai = timeParts[1];
+
+            try {
+                const response = await fetch(`/api/jadwal/${currentEditId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        hari: day,
+                        jam_mulai: jam_mulai,
+                        jam_selesai: jam_selesai,
+                        kelas: kelas,
+                        jenis: type,
+                        instruktur: instructor
+                    })
+                });
+
+                // Jika 401 Unauthorized, redirect ke login
+                if (response.status === 401) {
+                    alert('Session telah expired. Silakan login kembali.');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    loadSchedules();
+                    closeEditScheduleModal();
+                    alert('✓ Jadwal berhasil diupdate!');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Gagal mengupdate jadwal: ' + error.message);
+            }
+        }
+
+        async function deleteSchedule(id) {
+            if (!confirm('Yakin ingin menghapus jadwal ini?')) return;
+            
+            try {
+                const response = await fetch(`/api/jadwal/${id}`, {method: 'DELETE'});
+                
+                // Jika 401 Unauthorized, redirect ke login
+                if (response.status === 401) {
+                    alert('Session telah expired. Silakan login kembali.');
+                    window.location.href = '/admin/login';
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadSchedules();
+                    alert('✓ Jadwal telah dihapus!');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Gagal menghapus jadwal: ' + error.message);
             }
         }
 
@@ -410,8 +604,8 @@
             }
         }
 
-        renderScheduleCards();
-        renderScheduleTable();
+        // Load data on page load
+        loadSchedules();
         setActiveNav('schedule');
         
         document.querySelectorAll('.nav-link').forEach(link => {

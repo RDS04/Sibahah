@@ -3,10 +3,18 @@ import mysql.connector
 from mysql.connector import Error
 from datetime import datetime, timedelta
 import json
-import bcrypt 
+import base64
+import traceback
 from functools import wraps
 
-from datetime import timedelta
+
+# Custom JSON Encoder untuk handle datetime objects
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        return super().default(obj)
+
 
 def getDatabase():
     return mysql.connector.connect(
@@ -20,6 +28,9 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('admin_logged_in'):
+            # Jika API request, return JSON error. Jika HTML request, redirect
+            if request.path.startswith('/api/'):
+                return jsonify({'success': False, 'message': 'Unauthorized - Admin login required'}), 401
             return redirect('/admin/login')
         return f(*args, **kwargs)
     return decorated_function
@@ -32,6 +43,12 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
 app.config['SESSION_COOKIE_SECURE'] = False   # Set True jika pakai HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Set custom JSON encoder untuk handle datetime (untuk Flask 2.0+)
+try:
+    app.json.encoder_class = DateTimeEncoder  # Flask 2.0+
+except:
+    app.json_encoder = DateTimeEncoder  # Flask < 2.0
 
 
 # Panggil saat startup
@@ -207,7 +224,7 @@ def api_logout():
     return jsonify({'success': True}), 200
 
 
-# Route untuk menyimpan data pembayaran ke database
+# Route untuk menyimpan data pembayaran ke database (SPLIT: Pendaftaran + SPP)
 @app.route('/payment', methods=['POST'])
 def payment():
     try:
@@ -245,8 +262,25 @@ def payment():
         conn = getDatabase()
         cursor = conn.cursor(dictionary=True)
         
-        # Update data pembayaran di database
-        query = """
+        # ===== FETCH BIAYA dari database biaya_sekolah =====
+        print(f"[PAYMENT] STEP 0: Fetching biaya from biaya_sekolah table")
+        cursor.execute("SELECT uang_pendaftaran, uang_spp FROM biaya_sekolah WHERE id = 1")
+        biaya_result = cursor.fetchone()
+        
+        if biaya_result:
+            biaya_pendaftaran = biaya_result['uang_pendaftaran'] or 40000
+            biaya_spp = biaya_result['uang_spp'] or 160000
+        else:
+            # Fallback ke default jika biaya_sekolah kosong
+            biaya_pendaftaran = 40000
+            biaya_spp = 160000
+        
+        print(f"[PAYMENT] Biaya fetched - Pendaftaran: {biaya_pendaftaran}, SPP: {biaya_spp}")
+        
+        # ===== STEP 1: Update pendaftaran dengan pembayaran PENDAFTARAN =====
+        print(f"[PAYMENT] STEP 1: Updating pendaftaran table with registration payment")
+        
+        query_pendaftaran = """
         UPDATE pendaftaran 
         SET status_pembayaran = 'SUDAH_BAYAR',
             metode_pembayaran = %s,
@@ -259,31 +293,68 @@ def payment():
         WHERE id = %s
         """
         
-        total_pembayaran = data.get('total_pembayaran', '0')
-        
-        values = (
+        values_pendaftaran = (
             data.get('metode_pembayaran', 'Bank Transfer'),
             data.get('namaPengirim', ''),
             data.get('nomorRekening', ''),
             data.get('catatan', ''),
             bukti_transfer,
-            total_pembayaran,
+            biaya_pendaftaran,  # Only registration fee
             registration_id
         )
         
-        print(f"[PAYMENT] Executing query with registration_id: {registration_id}")
+        cursor.execute(query_pendaftaran, values_pendaftaran)
+        affected_rows_1 = cursor.rowcount
+        print(f"[PAYMENT] Pendaftaran updated, affected rows: {affected_rows_1}")
         
-        cursor.execute(query, values)
-        affected_rows = cursor.rowcount
+        # ===== STEP 2: Get siswa_id dari pendaftaran =====
+        print(f"[PAYMENT] STEP 2: Fetching siswa_id from pendaftaran")
+        cursor.execute("SELECT id FROM pendaftaran WHERE id = %s", (registration_id,))
+        result = cursor.fetchone()
+        if not result:
+            raise Exception(f"Pendaftaran ID {registration_id} not found")
         
-        print(f"[PAYMENT] Query executed, affected rows: {affected_rows}")
+        siswa_id = result['id']
+        print(f"[PAYMENT] Siswa ID: {siswa_id}")
+        
+        # ===== STEP 3: Insert SPP payment untuk bulan pertama =====
+        print(f"[PAYMENT] STEP 3: Inserting SPP payment (Rp {biaya_spp:,}) to spp_payments table")
+        
+        today = datetime.now()
+        payment_month = today.strftime('%Y-%m')  # Format: 2025-01
+        nama_siswa = data.get('namaPengirim', '')  # Gunakan nama pengirim
+        
+        query_spp = """
+        INSERT INTO spp_payments 
+        (pendaftaran_id, siswa_id, payment_month, amount, nama_pengirim, nomor_rekening_pengirim, catatan, bukti_transfer, tanggal_pembayaran)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+        """
+        
+        values_spp = (
+            registration_id,
+            siswa_id,
+            payment_month,
+            biaya_spp,
+            nama_siswa,
+            data.get('nomorRekening', ''),
+            data.get('catatan', ''),
+            bukti_transfer
+        )
+        
+        cursor.execute(query_spp, values_spp)
+        affected_rows_2 = cursor.rowcount
+        spp_payment_id = cursor.lastrowid
+        print(f"[PAYMENT] SPP payment inserted, affected rows: {affected_rows_2}, SPP ID: {spp_payment_id}")
         
         conn.commit()
         
         cursor.close()
         conn.close()
         
-        print(f"[PAYMENT] SUCCESS: Data saved to database")
+        print(f"[PAYMENT] SUCCESS: Data split and saved to 2 databases:")
+        print(f"  - Pendaftaran: Rp {biaya_pendaftaran:,}")
+        print(f"  - SPP: Rp {biaya_spp:,}")
+        print(f"  - Total: Rp {biaya_pendaftaran + biaya_spp:,}")
         
         # Clear session
         session.pop('registration_data', None)
@@ -291,8 +362,14 @@ def payment():
         
         return jsonify({
             'success': True, 
-            'message': 'Pembayaran berhasil disimpan ke database!',
-            'registration_id': registration_id
+            'message': 'Pembayaran berhasil disimpan ke database! (Split: Pendaftaran + SPP)',
+            'registration_id': registration_id,
+            'spp_payment_id': spp_payment_id,
+            'breakdown': {
+                'biaya_pendaftaran': biaya_pendaftaran,
+                'biaya_spp': biaya_spp,
+                'total': biaya_pendaftaran + biaya_spp
+            }
         }), 201
         
     except Error as err:
@@ -821,7 +898,7 @@ def api_payments_spp():
         SELECT id, nama, wa, email, usia, gender, ortu, kelas, jadwal, catatan,
                status_pembayaran, metode_pembayaran, tanggal_daftar, tanggal_pembayaran, 
                keterangan, nama_pengirim, nomor_rekening_pengirim, catatan_transfer, 
-               bukti_transfer, 100000 as nominal
+               bukti_transfer, 160000 as nominal
         FROM pendaftaran
         WHERE status_pembayaran = 'SUDAH_BAYAR'
         ORDER BY tanggal_pembayaran DESC
@@ -979,6 +1056,199 @@ def api_biaya_update():
     except Exception as e:
         print(f"[API BIAYA UPDATE] Error: {e}")
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
+# API: CEK Status Pembayaran SPP Siswa per Bulan
+@app.route('/api/check-payment/<student_id>/<month>', methods=['GET'])
+def check_student_payment_status(student_id, month):
+    """
+    Check apakah siswa sudah membayar SPP untuk bulan tertentu (1-12)
+    """
+    try:
+        student_id = int(student_id)
+        month = int(month)
+        
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Cek apakah ada record pembayaran untuk bulan ini
+        cursor.execute(
+            "SELECT id, tanggal_pembayaran, amount FROM spp_payments WHERE siswa_id = %s AND payment_month = %s LIMIT 1",
+            (student_id, month)
+        )
+        payment_record = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        is_paid = payment_record is not None
+        
+        return jsonify({
+            'success': True,
+            'is_paid': is_paid,
+            'current_month': datetime.now().month,
+            'check_month': month,
+            'siswa_id': student_id,
+            'payment_date': payment_record['tanggal_pembayaran'] if is_paid else None,
+            'amount': payment_record['amount'] if is_paid else None
+        }), 200
+        
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Invalid student_id or month', 'is_paid': False}), 400
+    except Error as err:
+        print(f"[CHECK PAYMENT] Database error: {err}")
+        return jsonify({'success': False, 'message': f'Database error: {str(err)}', 'is_paid': False}), 500
+    except Exception as e:
+        print(f"[CHECK PAYMENT] Error: {e}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}', 'is_paid': False}), 500
+
+
+# TEST: Simple test endpoint
+@app.route('/api/test-hello', methods=['GET'])
+def test_hello():
+    return jsonify({'message': 'Hello from Test'}), 200
+
+
+# ===== JADWAL LATIHAN ENDPOINTS =====
+
+@app.route('/api/jadwal', methods=['GET'])
+def get_jadwal():
+    """GET semua jadwal latihan"""
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT * FROM jadwal_latihan 
+            WHERE is_active = TRUE 
+            ORDER BY FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), 
+                     jam_mulai ASC
+        """)
+        jadwal_list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        print(f'[API JADWAL] SUCCESS: {len(jadwal_list)} schedules loaded')
+        return jsonify({'success': True, 'data': jadwal_list}), 200
+    except Error as err:
+        print(f'[API JADWAL] Database error: {err}')
+        return jsonify({'success': False, 'message': str(err)}), 500
+    except Exception as e:
+        print(f'[API JADWAL] Unexpected error: {e}')
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/jadwal/<int:jenis_id>', methods=['GET'])
+def get_jadwal_by_jenis(jenis_id):
+    """GET jadwal berdasarkan jenis (1=Putra, 2=Putri)"""
+    jenis_map = {1: 'Putra', 2: 'Putri'}
+    jenis = jenis_map.get(jenis_id, 'Putra')
+    
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT * FROM jadwal_latihan 
+            WHERE jenis = %s AND is_active = TRUE
+            ORDER BY FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), 
+                     jam_mulai ASC
+        """, (jenis,))
+        jadwal_list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        print(f'[API JADWAL BY JENIS] Jenis={jenis}, Count={len(jadwal_list)}')
+        return jsonify({'success': True, 'data': jadwal_list}), 200
+    except Error as err:
+        print(f'[API JADWAL BY JENIS] Database error: {err}')
+        return jsonify({'success': False, 'message': str(err)}), 500
+    except Exception as e:
+        print(f'[API JADWAL BY JENIS] Unexpected error: {e}')
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/jadwal', methods=['POST'])
+@admin_required
+def create_jadwal():
+    """POST jadwal baru (Admin only)"""
+    try:
+        data = request.get_json()
+        hari = data.get('hari')
+        jam_mulai = data.get('jam_mulai')
+        jam_selesai = data.get('jam_selesai')
+        kelas = data.get('kelas')
+        jenis = data.get('jenis')
+        instruktur = data.get('instruktur', '')
+        kapasitas = data.get('kapasitas', 15)
+        
+        if not all([hari, jam_mulai, jam_selesai, kelas, jenis]):
+            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+        
+        conn = getDatabase()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO jadwal_latihan 
+            (hari, jam_mulai, jam_selesai, kelas, jenis, instruktur, kapasitas)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (hari, jam_mulai, jam_selesai, kelas, jenis, instruktur, kapasitas))
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'id': new_id, 'message': 'Jadwal berhasil ditambahkan'}), 201
+    except Error as err:
+        return jsonify({'success': False, 'message': str(err)}), 500
+
+
+@app.route('/api/jadwal/<int:jadwal_id>', methods=['PUT'])
+@admin_required
+def update_jadwal(jadwal_id):
+    """PUT update jadwal (Admin only)"""
+    try:
+        data = request.get_json()
+        conn = getDatabase()
+        cursor = conn.cursor()
+        
+        # Build update query dynamically
+        fields = []
+        values = []
+        allowed_fields = ['hari', 'jam_mulai', 'jam_selesai', 'kelas', 'jenis', 'instruktur', 'kapasitas', 'peserta', 'is_active']
+        
+        for field in allowed_fields:
+            if field in data:
+                fields.append(f"{field} = %s")
+                values.append(data[field])
+        
+        if not fields:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'No fields to update'}), 400
+        
+        values.append(jadwal_id)
+        query = f"UPDATE jadwal_latihan SET {', '.join(fields)} WHERE id = %s"
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Jadwal berhasil diupdate'}), 200
+    except Error as err:
+        return jsonify({'success': False, 'message': str(err)}), 500
+
+
+@app.route('/api/jadwal/<int:jadwal_id>', methods=['DELETE'])
+@admin_required
+def delete_jadwal(jadwal_id):
+    """DELETE jadwal (soft delete - set is_active=FALSE)"""
+    try:
+        conn = getDatabase()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE jadwal_latihan SET is_active = FALSE WHERE id = %s", (jadwal_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Jadwal berhasil dihapus'}), 200
+    except Error as err:
+        return jsonify({'success': False, 'message': str(err)}), 500
 
 
 if __name__ == '__main__':

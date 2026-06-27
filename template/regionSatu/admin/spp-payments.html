@@ -148,13 +148,30 @@
             </div>
         </nav>
     </aside>
-    <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="md:ml-72 min-h-screen bg-gray-50">
+        <!-- Header Top -->
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <button id="mobileMenuBtn" class="text-gray-600 hover:text-primary text-2xl md:hidden" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-darkblue">Pembayaran SPP</h2>
+                </div>
+            </div>
+        </header>
+
+        <div class="py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
-            <!-- Header -->
+            <!-- Page Header -->
             <div class="mb-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="header-title text-4xl mb-2">Pembayaran SPP</h1>
                         <p class="text-gray-600">Daftar pembayaran SPP bulanan siswa</p>
                     </div>
                     <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
@@ -393,6 +410,28 @@
         function closeDetailModal() {
             document.getElementById('detailModal').classList.add('hidden');
         }
+
+        // Sidebar functions
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('closed');
+            document.getElementById('mobileOverlay').classList.add('hidden');
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('closed');
+            document.getElementById('mobileOverlay').classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            if (document.getElementById('sidebar').classList.contains('closed')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        }
+
+        window.closeSidebar = closeSidebar;
+        window.toggleSidebar = toggleSidebar;
 
         // Load on page load
         window.addEventListener('load', loadSppPayments);

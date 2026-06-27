@@ -319,12 +319,12 @@
                     <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> Pembayaran dilakukan di halaman berikutnya.</p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4 mt-6">
-                    <button type="button" id="whatsappBtn" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
-                        <i class="fab fa-whatsapp text-xl"></i> Kirim Data via WA
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <button type="button" id="pendaftaranBtn" class="btn-success-gradient text-white font-bold py-3 rounded-xl text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-user-check"></i> Pendaftaran
                     </button>
-                    <button type="button" id="paymentBtn" class="flex-1 btn-success-gradient text-white font-bold py-3 rounded-xl text-lg transition-all flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fas fa-check-circle"></i> Daftar & Lanjut Pembayaran
+                    <button type="button" id="riwayatBtn" class="bg-primary hover:bg-darkblue text-white font-bold py-3 rounded-xl text-base transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-history"></i> Riwayat
                     </button>
                 </div>
                 <p class="text-center text-xs text-gray-400 mt-5">
@@ -443,20 +443,10 @@
             document.getElementById('modalTotalBiaya').textContent = formatRupiah(total);
         }
 
-        // ===== JADWAL DATA =====
-        const jadwalMapping = {
-            "Laki-laki": [
-                { label: "Selasa Sore (Putra)", jam: "17.00 – 18.00", value: "Selasa Sore (17.00-18.00)" },
-                { label: "Jumat Sore (Putra)", jam: "15.00 – 16.00", value: "Jumat Sore (15.00-16.00)" },
-                { label: "Sabtu Pagi (Putra)", jam: "09.00 – 10.00", value: "Sabtu Pagi (09.00-10.00)" },
-                { label: "Sabtu Sore (Putra)", jam: "15.00 – 16.00", value: "Sabtu Sore (15.00-16.00)" }
-            ],
-            "Perempuan": [
-                { label: "Selasa Sore (Putri)", jam: "16.00 – 17.00", value: "Selasa Sore (16.00-17.00)" },
-                { label: "Jumat Sore (Putri)", jam: "14.00 – 15.00", value: "Jumat Sore (14.00-15.00)" },
-                { label: "Sabtu Pagi (Putri)", jam: "08.00 – 09.00", value: "Sabtu Pagi (08.00-09.00)" },
-                { label: "Sabtu Sore (Putri)", jam: "14.00 – 15.00", value: "Sabtu Sore (14.00-15.00)" }
-            ]
+        // ===== JADWAL DATA (From Database) =====
+        let jadwalMapping = {
+            "Laki-laki": [],
+            "Perempuan": []
         };
 
         const jadwalContainer = document.getElementById('jadwalContainer');
@@ -464,8 +454,54 @@
         const warningDiv = document.getElementById('warningGenderJadwal');
         let currentGender = '';
 
+        // Load jadwal dari API database
+        async function loadJadwalFromDatabase() {
+            try {
+                // Ambil jadwal untuk Putra
+                const putraResponse = await fetch('/api/jadwal/1');
+                const putraResult = await putraResponse.json();
+                if (putraResult.success) {
+                    jadwalMapping["Laki-laki"] = putraResult.data.map(j => ({
+                        label: `${j.hari} ${j.kelas} (${j.jenis})`,
+                        jam: `${j.jam_mulai} – ${j.jam_selesai}`,
+                        value: `${j.hari} (${j.jam_mulai}-${j.jam_selesai})`
+                    }));
+                }
+
+                // Ambil jadwal untuk Putri
+                const putriResponse = await fetch('/api/jadwal/2');
+                const putriResult = await putriResponse.json();
+                if (putriResult.success) {
+                    jadwalMapping["Perempuan"] = putriResult.data.map(j => ({
+                        label: `${j.hari} ${j.kelas} (${j.jenis})`,
+                        jam: `${j.jam_mulai} – ${j.jam_selesai}`,
+                        value: `${j.hari} (${j.jam_mulai}-${j.jam_selesai})`
+                    }));
+                }
+
+                console.log('[JADWAL LOADED]', jadwalMapping);
+            } catch (error) {
+                console.error('Error loading jadwal:', error);
+                // Fallback ke data hardcoded jika API gagal
+                jadwalMapping = {
+                    "Laki-laki": [
+                        { label: "Selasa Sore (Putra)", jam: "17:00 – 18:00", value: "Selasa Sore (17:00-18:00)" },
+                        { label: "Jumat Sore (Putra)", jam: "15:00 – 16:00", value: "Jumat Sore (15:00-16:00)" },
+                        { label: "Sabtu Pagi (Putra)", jam: "09:00 – 10:00", value: "Sabtu Pagi (09:00-10:00)" },
+                        { label: "Sabtu Sore (Putra)", jam: "15:00 – 16:00", value: "Sabtu Sore (15:00-16:00)" }
+                    ],
+                    "Perempuan": [
+                        { label: "Selasa Sore (Putri)", jam: "16:00 – 17:00", value: "Selasa Sore (16:00-17:00)" },
+                        { label: "Jumat Sore (Putri)", jam: "14:00 – 15:00", value: "Jumat Sore (14:00-15:00)" },
+                        { label: "Sabtu Pagi (Putri)", jam: "08:00 – 09:00", value: "Sabtu Pagi (08:00-09:00)" },
+                        { label: "Sabtu Sore (Putri)", jam: "14:00 – 15:00", value: "Sabtu Sore (14:00-15:00)" }
+                    ]
+                };
+            }
+        }
+
         function renderJadwalByGender(gender) {
-            if (!gender || !jadwalMapping[gender]) {
+            if (!gender || !jadwalMapping[gender] || jadwalMapping[gender].length === 0) {
                 jadwalContainer.innerHTML = `<div class="col-span-2 text-center py-4 text-gray-400 bg-gray-50 rounded-xl"><i class="fas fa-venus-mars"></i> Silakan pilih jenis kelamin untuk melihat jadwal</div>`;
                 warningDiv.classList.remove('hidden');
                 return;
@@ -572,10 +608,10 @@
             const data = getFormData();
             
             // Tampilkan loading
-            const paymentBtn = document.getElementById('paymentBtn');
-            const originalText = paymentBtn.innerHTML;
-            paymentBtn.disabled = true;
-            paymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            const pendaftaranBtn = document.getElementById('pendaftaranBtn');
+            const originalText = pendaftaranBtn.innerHTML;
+            pendaftaranBtn.disabled = true;
+            pendaftaranBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             
             // Kirim data ke backend
             fetch('/register', {
@@ -610,15 +646,15 @@
                         window.location.href = '/pembayaran';
                     }, 1500);
                 } else {
-                    paymentBtn.disabled = false;
-                    paymentBtn.innerHTML = originalText;
+                    pendaftaranBtn.disabled = false;
+                    pendaftaranBtn.innerHTML = originalText;
                     alert('❌ ' + result.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                paymentBtn.disabled = false;
-                paymentBtn.innerHTML = originalText;
+                pendaftaranBtn.disabled = false;
+                pendaftaranBtn.innerHTML = originalText;
                 alert('❌ Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
             });
         }
@@ -662,7 +698,10 @@
         };
 
         document.getElementById('whatsappBtn')?.addEventListener('click', sendToWhatsApp);
-        document.getElementById('paymentBtn')?.addEventListener('click', proceedToPayment);
+        document.getElementById('pendaftaranBtn')?.addEventListener('click', proceedToPayment);
+        document.getElementById('riwayatBtn')?.addEventListener('click', function () {
+            window.open('/riwayat', '_blank');
+        });
 
         waInput?.addEventListener('input', function (e) {
             this.value = this.value.replace(/[^\d]/g, '').slice(0, 13);
@@ -674,8 +713,11 @@
             renderJadwalByGender(currentGender);
         }
 
-        // Load biaya saat halaman dibuka
-        window.addEventListener('DOMContentLoaded', loadBiayaFromAPI);
+        // Load biaya dan jadwal saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', () => {
+            loadBiayaFromAPI();
+            loadJadwalFromDatabase();
+        });
     </script>
 </body>
 </html>

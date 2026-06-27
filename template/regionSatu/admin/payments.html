@@ -307,6 +307,12 @@
         let paymentsDataRegistration = [];
         let paymentsDataSpp = [];
 
+        // Format Rupiah dengan koma
+        function formatRupiah(number) {
+            if (!number) return '0';
+            return Math.round(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
         // Fetch data dari API
         async function fetchPaymentsData() {
             try {
@@ -349,11 +355,15 @@
             const lunas = paymentsDataLunas.length;
             const pending = paymentsDataPending.length;
             const totalRevenue = paymentsDataLunas.reduce((sum, p) => sum + (p.nominal || 0), 0);
+            
+            // Format untuk total revenue dengan koma pemisah ribuan
+            const totalRevenueFormatted = `Rp ${formatRupiah(totalRevenue)}`;
+            const monthRevenueFormatted = `Rp ${formatRupiah(totalRevenue)}`;
 
             document.getElementById('totalLunas').innerText = lunas;
             document.getElementById('totalPending').innerText = pending;
-            document.getElementById('totalRevenue').innerText = `Rp ${totalRevenue.toLocaleString()}`;
-            document.getElementById('monthRevenue').innerText = `Rp ${totalRevenue.toLocaleString()}`;
+            document.getElementById('totalRevenue').innerText = totalRevenueFormatted;
+            document.getElementById('monthRevenue').innerText = monthRevenueFormatted;
         }
 
         function renderPaymentsTables() {
@@ -376,7 +386,7 @@
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">Januari 2025</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${(p.nominal || 0).toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.metode_pembayaran || 'Bank Transfer'}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
@@ -404,7 +414,7 @@
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${(p.nominal || 0).toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                             ⏳ Menunggu
@@ -431,7 +441,7 @@
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${(p.nominal || 0).toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
                             ✓ Lunas
@@ -458,7 +468,7 @@
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.kelas || '-'}</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${(p.nominal || 0).toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">
                             ✓ Lunas
@@ -527,7 +537,7 @@
                     <td class="px-6 py-3 text-sm">${idx + 1}</td>
                     <td class="px-6 py-3 font-medium text-gray-900">${p.nama || '-'}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">Januari 2025</td>
-                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${(p.nominal || 0).toLocaleString()}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-gray-900">Rp ${formatRupiah(p.nominal || 0)}</td>
                     <td class="px-6 py-3 text-sm text-gray-700">${p.metode_pembayaran || 'Bank Transfer'}</td>
                     <td class="px-6 py-3">
                         <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold status-active">

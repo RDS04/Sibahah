@@ -246,6 +246,15 @@
         let pendingRegistrations = [];
         let paymentsLog = [];
 
+        // Format Rupiah dengan koma separator
+        function formatRupiah(number) {
+            if (!number || isNaN(number)) return 'Rp 0';
+            const numStr = Math.round(number).toString();
+            const parts = numStr.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return 'Rp ' + parts.join(',');
+        }
+
         // Fetch stats untuk dashboard
         async function fetchDashboardStats() {
             try {
@@ -419,11 +428,11 @@
                                 <p class="text-xs text-accent mt-2">Menunggu pembayaran</p>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-success">
-                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan Pendaftaran</p><h3 class="text-2xl font-bold text-darkblue mt-1">Rp ${totalPendapatan.toLocaleString()}</h3></div><div class="bg-success/10 p-3 rounded-full"><i class="fas fa-money-bill-wave text-success text-xl"></i></div></div>
+                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan Pendaftaran</p><h3 class="text-2xl font-bold text-darkblue mt-1">${formatRupiah(totalPendapatan)}</h3></div><div class="bg-success/10 p-3 rounded-full"><i class="fas fa-money-bill-wave text-success text-xl"></i></div></div>
                                 <p class="text-xs text-success mt-2"><i class="fas fa-arrow-up"></i> Dari pendaftaran siswa</p>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-blue-500">
-                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan SPP</p><h3 class="text-2xl font-bold text-darkblue mt-1">Rp ${totalSppRevenue.toLocaleString()}</h3></div><div class="bg-blue-100 p-3 rounded-full"><i class="fas fa-calendar-check text-blue-500 text-xl"></i></div></div>
+                                <div class="flex justify-between items-start"><div><p class="text-gray-500 text-sm">Pendapatan SPP</p><h3 class="text-2xl font-bold text-darkblue mt-1">${formatRupiah(totalSppRevenue)}</h3></div><div class="bg-blue-100 p-3 rounded-full"><i class="fas fa-calendar-check text-blue-500 text-xl"></i></div></div>
                                 <p class="text-xs text-blue-600 mt-2"><i class="fas fa-arrow-up"></i> Dari pembayaran SPP bulanan</p>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-sm card-hover border-l-4 border-warning">
@@ -532,10 +541,8 @@
             }
 
             // Format biaya
-
-            const formatRupiah = biayaData.uang_pendaftaran + biayaData.uang_spp
-                ? (biayaData.uang_pendaftaran + biayaData.uang_spp).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
-                : 'Rp 40.000';
+            let biayaPendaftaran = student.total_pembayaran || 40000;
+            let biayaSpp = student.uang_spp || 100000;
 
             let historyHTML = `
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-4">
@@ -636,10 +643,11 @@
             const student = studentsData.find(s => s.id == studentId);
             if (!student) return;
 
-            const bulan = prompt(`Catat pembayaran SPP untuk ${student.nama}?\n\nBiaya: Rp ${(student.uang_spp || 100000).toLocaleString()}\n\nMasukkan bulan (contoh: Januari, Februari, dll):`);
+            const biaya = (student.uang_spp || 100000).toLocaleString('id-ID');
+            const bulan = prompt(`Catat pembayaran SPP untuk ${student.nama}?\n\nBiaya: Rp ${biaya}\n\nMasukkan bulan (contoh: Januari, Februari, dll):`);
 
             if (bulan) {
-                alert(`✅ Pembayaran SPP ${bulan} untuk ${student.nama} berhasil dicatat!\n\nBiaya: Rp ${(student.uang_spp || 100000).toLocaleString()}`);
+                alert(`✅ Pembayaran SPP ${bulan} untuk ${student.nama} berhasil dicatat!\n\nBiaya: Rp ${biaya}`);
             }
         }
 
@@ -834,7 +842,7 @@
                             <td class="p-3 text-sm">${idx + 1}</td>
                             <td class="p-3 font-medium">${p.nama}</td>
                             <td class="p-3 text-sm">${p.kelas}</td>
-                            <td class="p-3 text-sm">Rp ${p.nominal.toLocaleString()}</td>
+                            <td class="p-3 text-sm">Rp ${p.nominal.toLocaleString('id-ID')}</td>
                             <td class="p-3 text-sm">${p.metode_pembayaran || '-'}</td>
                             <td class="p-3 text-sm">${p.tanggal_pembayaran || '-'}</td>
                             <td class="p-3"><span class="status-badge status-active">Lunas</span></td>
