@@ -18,10 +18,10 @@ class DateTimeEncoder(json.JSONEncoder):
 
 def getDatabase():
     return mysql.connector.connect(
-        host="localhost",
+        host="mysql.railway.internal",
         user="root",
-        password="",
-        database="sekolah_renang_sibahah"
+        password="wwZUCGQiVGaHHzFSaddwYlNUvAcsdmcl",
+        database="railway"
     )
 
 def ensure_spp_payments_table():
